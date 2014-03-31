@@ -9,11 +9,9 @@
         <button id="button" role="button">Button</button>
         <script src="imagecrop.js"></script>
         <script>
-            var image = document.querySelector('.crop-me');
-
-            image.addEventListener('load', function () {
+            document.querySelector('.crop-me').addEventListener('load', function (e) {
                 var cropped = new ImageCrop({
-                    image: image,
+                    image: e.target,
                     opacity: 0.6
                 });
                 cropped.init();
