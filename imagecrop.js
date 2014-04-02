@@ -15,7 +15,11 @@ var ImageCrop = function (config) {
   options.selector = config.selector || 'img.imagecrop';
   options.image = config.image || document.querySelector(options.selector);
   options.opacity = (config.opacity >= 0) ? config.opacity : 0.4;
-  options.ratio = config.ratio || false;
+  options.outputWidth = config.outputWidth || false;
+  options.outputHeight = config.outputHeight || false;
+  options.ratio = (options.outputWidth && options.outputHeight) ?
+                  options.outputWidth / options.outputHeight :
+                  config.ratio || false;
 
   function drawInitialState() {
     // clear everything on the canvas
@@ -112,16 +116,18 @@ var ImageCrop = function (config) {
   this.save = function () {
     // create a new canvas, real quick like
     var tmpCanvas = document.createElement('canvas'),
-        tmpCtx = tmpCanvas.getContext('2d');
+        tmpCtx = tmpCanvas.getContext('2d'),
+        tmpWidth = options.outputWidth || self.cropCoords.width,
+        tmpHeight = options.outputHeight || self.cropCoords.height;
 
     // size the new canvas correctly
-    tmpCanvas.width = self.cropCoords.width;
-    tmpCanvas.height = self.cropCoords.height;
+    tmpCanvas.width = tmpWidth;
+    tmpCanvas.height = tmpHeight;
 
     // draw
     tmpCtx.drawImage(options.image, self.cropCoords.x, self.cropCoords.y,
                      self.cropCoords.width, self.cropCoords.height, 0, 0,
-                     self.cropCoords.width, self.cropCoords.height);
+                     tmpWidth, tmpHeight);
 
     return tmpCanvas.toDataURL();
   };
