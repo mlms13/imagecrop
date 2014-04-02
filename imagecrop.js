@@ -15,6 +15,7 @@ var ImageCrop = function (config) {
   options.selector = config.selector || 'img.imagecrop';
   options.image = config.image || document.querySelector(options.selector);
   options.opacity = (config.opacity >= 0) ? config.opacity : 0.4;
+  options.ratio = config.ratio || false;
 
   function drawInitialState() {
     // clear everything on the canvas
@@ -63,10 +64,29 @@ var ImageCrop = function (config) {
 
     // handle moving when the mouse is down
     canvas.addEventListener('mousemove', function (e) {
+      var minSideLength,
+          absWidth,
+          absHeight;
+
       if (mousedown) {
         // figure out the distance the mouse has moved while clicked
         self.cropCoords.width = (e.pageX - canvas.offsetLeft) - self.cropCoords.x;
         self.cropCoords.height = (e.pageY - canvas.offsetTop) - self.cropCoords.y;
+
+        // fix a ratio if required
+        if (options.ratio) {
+          absWidth = Math.abs(self.cropCoords.width);
+          absHeight = Math.abs(self.cropCoords.height);
+          minSideLength = Math.min(absWidth, absHeight);
+
+          self.cropCoords.width = self.cropCoords.width < 0 ?
+                                  -1 * minSideLength :
+                                  minSideLength;
+
+          self.cropCoords.height = self.cropCoords.height < 0 ?
+                                  -1 * minSideLength :
+                                  minSideLength;
+        }
 
         // and draw the selection box
         drawSelection();
