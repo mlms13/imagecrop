@@ -75,6 +75,15 @@ var ImageCrop = function (config) {
 
     // and handle mouse up
     canvas.addEventListener('mouseup', function (e) {
+      // handle dragging from not the top left
+      if (self.cropCoords.width < 0) {
+        self.cropCoords.width = Math.abs(self.cropCoords.width);
+        self.cropCoords.x -= self.cropCoords.width;
+      }
+      if (self.cropCoords.height < 0) {
+        self.cropCoords.height = Math.abs(self.cropCoords.height);
+        self.cropCoords.y -= self.cropCoords.height;
+      }
       mousedown = false;
     }, false);
   };
