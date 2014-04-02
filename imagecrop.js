@@ -77,11 +77,11 @@ var ImageCrop = function (config) {
         if (options.ratio) {
           absWidth = Math.abs(self.cropCoords.width);
           absHeight = Math.abs(self.cropCoords.height);
-          minSideLength = Math.min(absWidth, absHeight);
+          minSideLength = Math.min(absWidth / options.ratio, absHeight);
 
           self.cropCoords.width = self.cropCoords.width < 0 ?
-                                  -1 * minSideLength :
-                                  minSideLength;
+                                  -1 * minSideLength * options.ratio :
+                                  minSideLength * options.ratio;
 
           self.cropCoords.height = self.cropCoords.height < 0 ?
                                   -1 * minSideLength :
