@@ -2,7 +2,8 @@ var ImageCrop = function (config) {
   var self = this,
       options = {},
       canvas = document.createElement('canvas'),
-      ctx = canvas.getContext('2d');
+      ctx = canvas.getContext('2d'),
+      mouseLocation = '';
 
   this.cropCoords = {
     x: 0,
@@ -77,10 +78,7 @@ var ImageCrop = function (config) {
           canvasY = e.pageY - canvas.offsetTop;
 
       // check to see if we're clicking inside an existing selection
-      if (canvasX > self.cropCoords.x &&
-          canvasX < self.cropCoords.x + self.cropCoords.width &&
-          canvasY > self.cropCoords.y &&
-          canvasY < self.cropCoords.y + self.cropCoords.height) {
+      if (mouseLocation === 'selection') {
         // set the starting point for our drag 
         self.dragCoords.x = self.cropCoords.x;
         self.dragCoords.y = self.cropCoords.y;
@@ -105,6 +103,18 @@ var ImageCrop = function (config) {
           minSideLength,
           absWidth,
           absHeight;
+
+      // determine if the mouse is in the canvas selection
+      if (canvasX > self.cropCoords.x &&
+          canvasX < self.cropCoords.x + self.cropCoords.width &&
+          canvasY > self.cropCoords.y &&
+          canvasY < self.cropCoords.y + self.cropCoords.height) {
+        mouseLocation = 'selection';
+        canvas.style.cursor = 'move';
+      } else {
+        mouseLocation = '';
+        canvas.style.cursor = 'crosshair';
+      }
 
       if (drawing) {
         // figure out the distance the mouse has moved while clicked
