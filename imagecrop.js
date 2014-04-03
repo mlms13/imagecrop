@@ -40,7 +40,8 @@ var ImageCrop = function (config) {
 
   // initialize, by converting the supplied image to a canvas
   this.init = function () {
-    var mousedown = false;
+    var drawing = false,
+        dragging = false;
 
     if (!options.image) return;
 
@@ -58,12 +59,23 @@ var ImageCrop = function (config) {
 
     // set up event listeners on the canvas
     canvas.addEventListener('mousedown', function (e) {
+      var canvasX = e.pageX - canvas.offsetLeft,
+          canvasY = e.pageY - canvas.offsetTop;
+
+      // check to see if we're clicking inside an existing selection
+      if (canvasX > self.cropCoords.x &&
+          canvasX < self.cropCoords.x + self.cropCoords.width &&
+          canvasY > self.cropCoords.y &&
+          canvasY < self.cropCoords.y + self.cropCoords.height) {
+        document.body.style.background = "red";
+      }
+
       // make sure everybody knows the mouse is down
       mousedown = true;
 
       // set initial top and left coordinates
-      self.cropCoords.x = e.pageX - canvas.offsetLeft;
-      self.cropCoords.y = e.pageY - canvas.offsetTop;
+      self.cropCoords.x = canvasX;
+      self.cropCoords.y = canvasY;
     }, false);
 
     // handle moving when the mouse is down
