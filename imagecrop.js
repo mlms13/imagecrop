@@ -2,13 +2,20 @@ var ImageCrop = function (config) {
   var self = this,
       options = {},
       canvas = document.createElement('canvas'),
-      ctx = canvas.getContext('2d');
+      ctx = canvas.getContext('2d'),
+      mouseLocation = '';
 
   this.cropCoords = {
     x: 0,
     y: 0,
     height: 0,
     width: 0
+  };
+  this.dragCoords = {
+    x: 0,
+    y: 0,
+    mouseX: 0,
+    mouseY: 0
   };
 
   // defaults for all options
@@ -38,9 +45,18 @@ var ImageCrop = function (config) {
                   self.cropCoords.width, self.cropCoords.height);
   }
 
+  function moveSelection (horizontal, vertical) {
+    // take a vertical and horizontal difference and shift the x and y of the canvas respectively
+    self.cropCoords.x = self.dragCoords.x + horizontal;
+    self.cropCoords.y = self.dragCoords.y + vertical;
+
+    drawSelection();
+  }
+
   // initialize, by converting the supplied image to a canvas
   this.init = function () {
-    var mousedown = false;
+    var drawing = false,
+        dragging = false;
 
     if (!options.image) return;
 
@@ -58,24 +74,52 @@ var ImageCrop = function (config) {
 
     // set up event listeners on the canvas
     canvas.addEventListener('mousedown', function (e) {
-      // make sure everybody knows the mouse is down
-      mousedown = true;
+      var canvasX = e.pageX - canvas.offsetLeft,
+          canvasY = e.pageY - canvas.offsetTop;
 
-      // set initial top and left coordinates
-      self.cropCoords.x = e.pageX - canvas.offsetLeft;
-      self.cropCoords.y = e.pageY - canvas.offsetTop;
+      // check to see if we're clicking inside an existing selection
+      if (mouseLocation === 'selection') {
+        // set the starting point for our drag 
+        self.dragCoords.x = self.cropCoords.x;
+        self.dragCoords.y = self.cropCoords.y;
+        self.dragCoords.mouseX = canvasX - self.cropCoords.x;
+        self.dragCoords.mouseY = canvasY - self.cropCoords.y;
+
+        dragging = true;
+      } else {
+        // make sure everybody knows the mouse is down
+        drawing = true;
+
+        // set initial top and left coordinates
+        self.cropCoords.x = canvasX;
+        self.cropCoords.y = canvasY;
+      }
     }, false);
 
     // handle moving when the mouse is down
     canvas.addEventListener('mousemove', function (e) {
-      var minSideLength,
+      var canvasX = e.pageX - canvas.offsetLeft,
+          canvasY = e.pageY - canvas.offsetLeft,
+          minSideLength,
           absWidth,
           absHeight;
 
-      if (mousedown) {
+      // determine if the mouse is in the canvas selection
+      if (canvasX > self.cropCoords.x &&
+          canvasX < self.cropCoords.x + self.cropCoords.width &&
+          canvasY > self.cropCoords.y &&
+          canvasY < self.cropCoords.y + self.cropCoords.height) {
+        mouseLocation = 'selection';
+        canvas.style.cursor = 'move';
+      } else {
+        mouseLocation = '';
+        canvas.style.cursor = 'crosshair';
+      }
+
+      if (drawing) {
         // figure out the distance the mouse has moved while clicked
-        self.cropCoords.width = (e.pageX - canvas.offsetLeft) - self.cropCoords.x;
-        self.cropCoords.height = (e.pageY - canvas.offsetTop) - self.cropCoords.y;
+        self.cropCoords.width = canvasX - self.cropCoords.x;
+        self.cropCoords.height = canvasY - self.cropCoords.y;
 
         // fix a ratio if required
         if (options.ratio) {
@@ -95,6 +139,10 @@ var ImageCrop = function (config) {
         // and draw the selection box
         drawSelection();
       }
+      if (dragging) {
+        moveSelection(canvasX - self.dragCoords.x - self.dragCoords.mouseX,
+                      canvasY - self.dragCoords.y - self.dragCoords.mouseY);
+      }
     }, false);
 
     // and handle mouse up
@@ -108,7 +156,8 @@ var ImageCrop = function (config) {
         self.cropCoords.height = Math.abs(self.cropCoords.height);
         self.cropCoords.y -= self.cropCoords.height;
       }
-      mousedown = false;
+      dragging = false;
+      drawing = false;
     }, false);
   };
 
