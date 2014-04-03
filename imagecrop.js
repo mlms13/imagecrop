@@ -9,7 +9,7 @@ var ImageCrop = function (config) {
     y: 0,
     height: 0,
     width: 0
-  },
+  };
   this.dragCoords = {
     x: 0,
     y: 0,
@@ -100,14 +100,16 @@ var ImageCrop = function (config) {
 
     // handle moving when the mouse is down
     canvas.addEventListener('mousemove', function (e) {
-      var minSideLength,
+      var canvasX = e.pageX - canvas.offsetLeft,
+          canvasY = e.pageY - canvas.offsetLeft,
+          minSideLength,
           absWidth,
           absHeight;
 
       if (drawing) {
         // figure out the distance the mouse has moved while clicked
-        self.cropCoords.width = (e.pageX - canvas.offsetLeft) - self.cropCoords.x;
-        self.cropCoords.height = (e.pageY - canvas.offsetTop) - self.cropCoords.y;
+        self.cropCoords.width = canvasX - self.cropCoords.x;
+        self.cropCoords.height = canvasY - self.cropCoords.y;
 
         // fix a ratio if required
         if (options.ratio) {
@@ -128,8 +130,8 @@ var ImageCrop = function (config) {
         drawSelection();
       }
       if (dragging) {
-        // mousePosition - currentBoxPosition
-        moveSelection((e.pageX - canvas.offsetLeft) - self.dragCoords.x - self.dragCoords.mouseX, (e.pageY - canvas.offsetTop) - self.dragCoords.y - self.dragCoords.mouseY);
+        moveSelection(canvasX - self.dragCoords.x - self.dragCoords.mouseX,
+                      canvasY - self.dragCoords.y - self.dragCoords.mouseY);
       }
     }, false);
 
