@@ -14,6 +14,8 @@ var ImageCrop = function (config) {
   this.dragCoords = {
     x: 0,
     y: 0,
+    height: 0,
+    width: 0,
     mouseX: 0,
     mouseY: 0
   };
@@ -27,6 +29,7 @@ var ImageCrop = function (config) {
   options.ratio = (options.outputWidth && options.outputHeight) ?
                   options.outputWidth / options.outputHeight :
                   config.ratio || false;
+  options.handleSize = config.handleSize || 10;
 
   function drawInitialState() {
     // clear everything on the canvas
@@ -53,10 +56,18 @@ var ImageCrop = function (config) {
     drawSelection();
   }
 
+  function resizeSelection (horizontal, vertical) {
+    self.cropCoords.width = self.dragCoords.width + horizontal;
+    self.cropCoords.height = self.dragCoords.height + vertical;
+
+    drawSelection();
+  }
+
   // initialize, by converting the supplied image to a canvas
   this.init = function () {
     var drawing = false,
-        dragging = false;
+        dragging = false,
+        resizing = false;
 
     if (!options.image) return;
 
@@ -78,8 +89,17 @@ var ImageCrop = function (config) {
           canvasY = e.pageY - canvas.offsetTop;
 
       // check to see if we're clicking inside an existing selection
-      if (mouseLocation === 'selection') {
-        // set the starting point for our drag 
+      if (mouseLocation === 'nw-resize') {
+        self.dragCoords.x = self.cropCoords.x;
+        self.dragCoords.y = self.cropCoords.y;
+        self.dragCoords.height = self.cropCoords.height;
+        self.dragCoords.width = self.cropCoords.width;
+        self.dragCoords.mouseX = canvasX - self.cropCoords.x;
+        self.dragCoords.mouseY = canvasY - self.cropCoords.y;
+
+        resizing = true;
+      } else if (mouseLocation === 'selection') {
+        // set the starting point for our drag
         self.dragCoords.x = self.cropCoords.x;
         self.dragCoords.y = self.cropCoords.y;
         self.dragCoords.mouseX = canvasX - self.cropCoords.x;
@@ -105,10 +125,16 @@ var ImageCrop = function (config) {
           absHeight;
 
       // determine if the mouse is in the canvas selection
-      if (canvasX > self.cropCoords.x &&
-          canvasX < self.cropCoords.x + self.cropCoords.width &&
-          canvasY > self.cropCoords.y &&
-          canvasY < self.cropCoords.y + self.cropCoords.height) {
+      if (canvasX > self.cropCoords.x - (options.handleSize / 2) &&
+          canvasX < self.cropCoords.x + (options.handleSize / 2) &&
+          canvasY > self.cropCoords.y - (options.handleSize / 2) &&
+          canvasY < self.cropCoords.y + (options.handleSize / 2)) {
+        mouseLocation = 'nw-resize';
+        canvas.style.cursor = 'nwse-resize';
+      } else if (canvasX > self.cropCoords.x &&
+                 canvasX < self.cropCoords.x + self.cropCoords.width &&
+                 canvasY > self.cropCoords.y &&
+                 canvasY < self.cropCoords.y + self.cropCoords.height) {
         mouseLocation = 'selection';
         canvas.style.cursor = 'move';
       } else {
@@ -143,6 +169,13 @@ var ImageCrop = function (config) {
         moveSelection(canvasX - self.dragCoords.x - self.dragCoords.mouseX,
                       canvasY - self.dragCoords.y - self.dragCoords.mouseY);
       }
+      if (resizing) {
+        moveSelection(canvasX - self.dragCoords.x,
+                      canvasY - self.dragCoords.y);
+
+        resizeSelection((canvasX - self.dragCoords.x) * -1,
+                        (canvasY - self.dragCoords.y) * -1);
+      }
     }, false);
 
     // and handle mouse up
@@ -158,6 +191,7 @@ var ImageCrop = function (config) {
       }
       dragging = false;
       drawing = false;
+      resizing = false;
     }, false);
   };
 
