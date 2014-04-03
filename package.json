@@ -1,12 +1,16 @@
 {
   "name": "imagecrop",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "ImageCrop is a simple canvas-based tool to help you crop images.",
   "main": "imagecrop.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": ["canvas", "crop", "image"],
+  "keywords": [
+    "canvas",
+    "crop",
+    "image"
+  ],
   "author": "Michael Martin-Smucker",
   "license": "MIT",
   "devDependencies": {
