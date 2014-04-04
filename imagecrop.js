@@ -171,8 +171,8 @@ var ImageCrop = function (config) {
                       canvasY - self.dragCoords.y - self.dragCoords.mouseY);
       }
       if (resizing) {
-        moveSelection(canvasX - self.dragCoords.x,
-                      canvasY - self.dragCoords.y);
+        moveSelection(self.dragCoords.width - self.cropCoords.width,
+                      self.dragCoords.height - self.cropCoords.height);
 
         resizeSelection((canvasX - self.dragCoords.x) * -1,
                         (canvasY - self.dragCoords.y) * -1);
