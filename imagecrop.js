@@ -234,7 +234,7 @@ window.ImageCrop = function (config) {
   // update canvas with new size and save content as png
   this.save = function () {
     // if a ratio is set after init, ratio wins over output width/height
-    if (options.outputWidth / options.outputHeight !== ratio) {
+    if (options.outputWidth / options.outputHeight !== options.ratio) {
       options.outputWidth = false;
       options.outputHeight = false;
     }
