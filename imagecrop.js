@@ -41,7 +41,26 @@ var ImageCrop = function (config) {
   }
 
   function drawSelection() {
+    var absWidth,
+        absHeight;
+
     drawInitialState();
+
+    // fix a ratio if required
+    if (options.ratio) {
+      var absWidth = Math.abs(self.cropCoords.width),
+          absHeight = Math.abs(self.cropCoords.height),
+          minSideLength = Math.min(absWidth / options.ratio, absHeight);
+
+      self.cropCoords.width = self.cropCoords.width < 0 ?
+                              -1 * minSideLength * options.ratio :
+                              minSideLength * options.ratio;
+
+      self.cropCoords.height = self.cropCoords.height < 0 ?
+                              -1 * minSideLength :
+                              minSideLength;
+    }
+
     ctx.drawImage(options.image, self.cropCoords.x, self.cropCoords.y,
                   self.cropCoords.width, self.cropCoords.height,
                   self.cropCoords.x, self.cropCoords.y,
@@ -119,10 +138,7 @@ var ImageCrop = function (config) {
     // handle moving when the mouse is down
     canvas.addEventListener('mousemove', function (e) {
       var canvasX = e.pageX - canvas.offsetLeft,
-          canvasY = e.pageY - canvas.offsetLeft,
-          minSideLength,
-          absWidth,
-          absHeight;
+          canvasY = e.pageY - canvas.offsetLeft;
 
       // determine if the mouse is in the canvas selection
       if (canvasX > self.cropCoords.x - (options.handleSize / 2) &&
@@ -146,21 +162,6 @@ var ImageCrop = function (config) {
         // figure out the distance the mouse has moved while clicked
         self.cropCoords.width = canvasX - self.cropCoords.x;
         self.cropCoords.height = canvasY - self.cropCoords.y;
-
-        // fix a ratio if required
-        if (options.ratio) {
-          absWidth = Math.abs(self.cropCoords.width);
-          absHeight = Math.abs(self.cropCoords.height);
-          minSideLength = Math.min(absWidth / options.ratio, absHeight);
-
-          self.cropCoords.width = self.cropCoords.width < 0 ?
-                                  -1 * minSideLength * options.ratio :
-                                  minSideLength * options.ratio;
-
-          self.cropCoords.height = self.cropCoords.height < 0 ?
-                                  -1 * minSideLength :
-                                  minSideLength;
-        }
 
         // and draw the selection box
         drawSelection();
