@@ -5,7 +5,7 @@ window.ImageCrop = function (config) {
       options = {},
       canvas = document.createElement('canvas'),
       ctx = canvas.getContext('2d'),
-      mouseLocation = '';
+      mouseLocation = false;
 
   this.cropCoords = {
     x: 0,
@@ -16,6 +16,8 @@ window.ImageCrop = function (config) {
   this.dragCoords = {
     x: 0,
     y: 0,
+    height: 0,
+    width: 0,
     mouseX: 0,
     mouseY: 0
   };
@@ -29,6 +31,7 @@ window.ImageCrop = function (config) {
   options.ratio = (options.outputWidth && options.outputHeight) ?
                   options.outputWidth / options.outputHeight :
                   config.ratio || false;
+  options.handleSize = config.handleSize || 10;
 
   function drawInitialState() {
     // clear everything on the canvas
@@ -41,24 +44,31 @@ window.ImageCrop = function (config) {
 
   function drawSelection() {
     drawInitialState();
+
+    // fix a ratio if required
+    if (options.ratio) {
+      var absWidth = Math.abs(self.cropCoords.width),
+          absHeight = Math.abs(self.cropCoords.height),
+          minSideLength = Math.min(absWidth / options.ratio, absHeight);
+
+      self.cropCoords.width = self.cropCoords.width < 0 ?
+                              -1 * minSideLength * options.ratio :
+                              minSideLength * options.ratio;
+
+      self.cropCoords.height = self.cropCoords.height < 0 ?
+                              -1 * minSideLength :
+                              minSideLength;
+    }
+
     ctx.drawImage(options.image, self.cropCoords.x, self.cropCoords.y,
                   self.cropCoords.width, self.cropCoords.height,
                   self.cropCoords.x, self.cropCoords.y,
                   self.cropCoords.width, self.cropCoords.height);
   }
 
-  function moveSelection (horizontal, vertical) {
-    // take a vertical and horizontal difference and shift the x and y of the canvas respectively
-    self.cropCoords.x = self.dragCoords.x + horizontal;
-    self.cropCoords.y = self.dragCoords.y + vertical;
-
-    drawSelection();
-  }
-
   // initialize, by converting the supplied image to a canvas
   this.init = function () {
-    var drawing = false,
-        dragging = false;
+    var currentMouseState = false;
 
     if (!options.image) { return; }
 
@@ -74,76 +84,125 @@ window.ImageCrop = function (config) {
     drawInitialState();
     options.image.style.visibility = 'hidden';
 
+    // handle moving when the mouse is down
+    canvas.addEventListener('mousemove', function (e) {
+      var canvasX = e.pageX - canvas.offsetLeft,
+          canvasY = e.pageY - canvas.offsetTop;
+
+      if (currentMouseState === 'resizing') {
+        if (mouseLocation === 'nw-resize') {
+          self.cropCoords.x = self.dragCoords.x;
+          self.cropCoords.y = self.dragCoords.y;
+        } else if (mouseLocation === 'ne-resize') {
+          self.cropCoords.x = self.dragCoords.x;
+          self.cropCoords.y = self.dragCoords.y + self.dragCoords.height;
+        } else if (mouseLocation === 'se-resize') {
+          self.cropCoords.x = self.dragCoords.x;
+          self.cropCoords.y = self.dragCoords.y;
+        } else if (mouseLocation === 'sw-resize') {
+          self.cropCoords.x = self.dragCoords.x + self.dragCoords.width;
+          self.cropCoords.y = self.dragCoords.y;
+        }
+        self.cropCoords.width = self.dragCoords.width + (canvasX - self.dragCoords.x - self.dragCoords.width);
+        self.cropCoords.height = self.dragCoords.height + (canvasY - self.dragCoords.y - self.dragCoords.height);
+      } else if (currentMouseState === 'drawing') {
+        self.cropCoords.width = canvasX - self.cropCoords.x;
+        self.cropCoords.height = canvasY - self.cropCoords.y;
+      } else if (currentMouseState === 'dragging') {
+        self.cropCoords.x = self.dragCoords.x + canvasX - self.dragCoords.x - self.dragCoords.mouseX;
+        self.cropCoords.y = self.dragCoords.y + canvasY - self.dragCoords.y - self.dragCoords.mouseY;
+      }
+
+      if (currentMouseState) {
+        // draw the selection box
+        drawSelection();
+      } else {
+        // determine where the mouse is in the canvas selection
+        if (canvasX > self.cropCoords.x - (options.handleSize / 2) &&
+            canvasX < self.cropCoords.x + (options.handleSize / 2) &&
+            canvasY > self.cropCoords.y - (options.handleSize / 2) &&
+            canvasY < self.cropCoords.y + (options.handleSize / 2)) {
+          mouseLocation = 'nw-resize';
+          canvas.style.cursor = 'nwse-resize';
+        } else if (canvasX > self.cropCoords.x + self.cropCoords.width - (options.handleSize / 2) &&
+                   canvasX < self.cropCoords.x + self.cropCoords.width + (options.handleSize / 2) &&
+                   canvasY > self.cropCoords.y - (options.handleSize / 2) &&
+                   canvasY < self.cropCoords.y + (options.handleSize / 2)) {
+          mouseLocation = 'ne-resize';
+          canvas.style.cursor = 'nesw-resize';
+        } else if (canvasX > self.cropCoords.x + self.cropCoords.width - (options.handleSize / 2) &&
+                   canvasX < self.cropCoords.x + self.cropCoords.width + (options.handleSize / 2) &&
+                   canvasY > self.cropCoords.y + self.cropCoords.height - (options.handleSize / 2) &&
+                   canvasY < self.cropCoords.y + self.cropCoords.height + (options.handleSize / 2)) {
+          mouseLocation = 'se-resize';
+          canvas.style.cursor = 'nwse-resize';
+        } else if (canvasX > self.cropCoords.x - (options.handleSize / 2) &&
+                   canvasX < self.cropCoords.x + (options.handleSize / 2) &&
+                   canvasY > self.cropCoords.y + self.cropCoords.height - (options.handleSize / 2) &&
+                   canvasY < self.cropCoords.y + self.cropCoords.height + (options.handleSize / 2)) {
+          mouseLocation = 'sw-resize';
+          canvas.style.cursor = 'nesw-resize';
+        } else if (canvasX > self.cropCoords.x &&
+                   canvasX < self.cropCoords.x + self.cropCoords.width &&
+                   canvasY > self.cropCoords.y &&
+                   canvasY < self.cropCoords.y + self.cropCoords.height) {
+          mouseLocation = 'selection';
+          canvas.style.cursor = 'move';
+        } else {
+          mouseLocation = false;
+          canvas.style.cursor = 'crosshair';
+        }
+      }
+    }, false);
+
     // set up event listeners on the canvas
     canvas.addEventListener('mousedown', function (e) {
       var canvasX = e.pageX - canvas.offsetLeft,
           canvasY = e.pageY - canvas.offsetTop;
 
       // check to see if we're clicking inside an existing selection
-      if (mouseLocation === 'selection') {
-        // set the starting point for our drag 
+      if (mouseLocation === 'nw-resize') {
+        self.dragCoords.x = self.cropCoords.x + self.cropCoords.width;
+        self.dragCoords.y = self.cropCoords.y + self.cropCoords.height;
+        self.dragCoords.height = self.cropCoords.height * -1;
+        self.dragCoords.width = self.cropCoords.width * -1;
+
+        currentMouseState = 'resizing';
+      } else if (mouseLocation === 'ne-resize') {
+        self.dragCoords.x = self.cropCoords.x;
+        self.dragCoords.y = self.cropCoords.y + self.cropCoords.height * 2;
+        self.dragCoords.height = self.cropCoords.height * -1;
+        self.dragCoords.width = self.cropCoords.width;
+
+        currentMouseState = 'resizing';
+      } else if (mouseLocation === 'se-resize') {
+        self.dragCoords.x = self.cropCoords.x;
+        self.dragCoords.y = self.cropCoords.y;
+        self.dragCoords.height = self.cropCoords.height;
+        self.dragCoords.width = self.cropCoords.width;
+
+        currentMouseState = 'resizing';
+      } else if (mouseLocation === 'sw-resize') {
+        self.dragCoords.x = self.cropCoords.x + self.cropCoords.width * 2;
+        self.dragCoords.y = self.cropCoords.y;
+        self.dragCoords.height = self.cropCoords.height;
+        self.dragCoords.width = self.cropCoords.width * -1;
+
+        currentMouseState = 'resizing';
+      } else if (mouseLocation === 'selection') {
+        // set the starting point for our drag
         self.dragCoords.x = self.cropCoords.x;
         self.dragCoords.y = self.cropCoords.y;
         self.dragCoords.mouseX = canvasX - self.cropCoords.x;
         self.dragCoords.mouseY = canvasY - self.cropCoords.y;
 
-        dragging = true;
+        currentMouseState = 'dragging';
       } else {
-        // make sure everybody knows the mouse is down
-        drawing = true;
-
         // set initial top and left coordinates
         self.cropCoords.x = canvasX;
         self.cropCoords.y = canvasY;
-      }
-    }, false);
 
-    // handle moving when the mouse is down
-    canvas.addEventListener('mousemove', function (e) {
-      var canvasX = e.pageX - canvas.offsetLeft,
-          canvasY = e.pageY - canvas.offsetLeft,
-          minSideLength,
-          absWidth,
-          absHeight;
-
-      // determine if the mouse is in the canvas selection
-      if (canvasX > self.cropCoords.x &&
-          canvasX < self.cropCoords.x + self.cropCoords.width &&
-          canvasY > self.cropCoords.y &&
-          canvasY < self.cropCoords.y + self.cropCoords.height) {
-        mouseLocation = 'selection';
-        canvas.style.cursor = 'move';
-      } else {
-        mouseLocation = '';
-        canvas.style.cursor = 'crosshair';
-      }
-
-      if (drawing) {
-        // figure out the distance the mouse has moved while clicked
-        self.cropCoords.width = canvasX - self.cropCoords.x;
-        self.cropCoords.height = canvasY - self.cropCoords.y;
-
-        // fix a ratio if required
-        if (options.ratio) {
-          absWidth = Math.abs(self.cropCoords.width);
-          absHeight = Math.abs(self.cropCoords.height);
-          minSideLength = Math.min(absWidth / options.ratio, absHeight);
-
-          self.cropCoords.width = self.cropCoords.width < 0 ?
-                                  -1 * minSideLength * options.ratio :
-                                  minSideLength * options.ratio;
-
-          self.cropCoords.height = self.cropCoords.height < 0 ?
-                                  -1 * minSideLength :
-                                  minSideLength;
-        }
-
-        // and draw the selection box
-        drawSelection();
-      }
-      if (dragging) {
-        moveSelection(canvasX - self.dragCoords.x - self.dragCoords.mouseX,
-                      canvasY - self.dragCoords.y - self.dragCoords.mouseY);
+        currentMouseState = 'drawing';
       }
     }, false);
 
@@ -158,8 +217,7 @@ window.ImageCrop = function (config) {
         self.cropCoords.height = Math.abs(self.cropCoords.height);
         self.cropCoords.y -= self.cropCoords.height;
       }
-      dragging = false;
-      drawing = false;
+      currentMouseState = false;
     }, false);
   };
 
