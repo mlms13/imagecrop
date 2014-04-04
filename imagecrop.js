@@ -220,8 +220,8 @@ window.ImageCrop = function (config) {
       }
     }, false);
 
-    // and handle mouse up
-    canvas.addEventListener('mouseup', function () {
+    // handle mouse up / mouse out
+    var endMouseMove = function () {
       // handle dragging from not the top left
       if (self.cropCoords.width < 0) {
         self.cropCoords.width = Math.abs(self.cropCoords.width);
@@ -232,7 +232,9 @@ window.ImageCrop = function (config) {
         self.cropCoords.y -= self.cropCoords.height;
       }
       currentMouseState = false;
-    }, false);
+    };
+    canvas.addEventListener('mouseup', endMouseMove, false);
+    canvas.addEventListener('mouseout', endMouseMove, false);
   };
 
   // update canvas with new size and save content as png
