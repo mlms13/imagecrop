@@ -121,6 +121,12 @@ window.ImageCrop = function (config) {
         self.cropCoords.y = self.dragCoords.y + canvasY - self.dragCoords.y - self.dragCoords.mouseY;
       }
 
+      // collision detection
+      if (self.cropCoords.x < 0) self.cropCoords.x = 0;
+      if (self.cropCoords.y < 0) self.cropCoords.y = 0;
+      if (self.cropCoords.x + self.cropCoords.width > ctx.canvas.width) self.cropCoords.x = ctx.canvas.width - self.cropCoords.width;
+      if (self.cropCoords.y + self.cropCoords.height > ctx.canvas.height) self.cropCoords.y = ctx.canvas.height - self.cropCoords.height;
+
       if (currentMouseState) {
         // draw the selection box
         drawSelection();
