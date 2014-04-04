@@ -6,6 +6,7 @@
     </head>
     <body>
         <img class="crop-me" src="kitteh.jpg" alt="It's a Kitteh">
+        <input type="number" step=".1" min="0" id="ratio-setter">
         <button id="button" role="button">Button</button>
         <script src="imagecrop.js"></script>
         <script>
@@ -20,6 +21,9 @@
 
                 document.querySelector('#button').addEventListener('click', function () {
                     window.open(cropped.save());
+                });
+                document.querySelector('#ratio-setter').addEventListener('keyup', function (e) {
+                    cropped.set('ratio', parseFloat(e.target.value));
                 });
             };
 

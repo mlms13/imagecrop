@@ -256,4 +256,22 @@ window.ImageCrop = function (config) {
 
     return tmpCanvas.toDataURL();
   };
+
+  // allow changing the options after the plugin has loaded
+  this.set = function (prop, value) {
+    var objProp;
+
+    if (typeof prop === 'object') {
+      // if an object is passed as the first parameter, loop through it
+      for (objProp in prop) {
+        self.set(objProp, prop[objProp])
+      }
+    } else {
+      // otherwise assume we were given a property
+      // update that property
+      options[prop] = value;
+      // and redraw
+      drawSelection();
+    }
+  };
 };
