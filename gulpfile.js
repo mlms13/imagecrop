@@ -7,7 +7,7 @@ gulp.task('lint', function () {
     stylish = require('jshint-stylish');
 
   return gulp.src('imagecrop.js')
-    .pipe(jshint())
+    .pipe(jshint({ indent: 2 }))
     .pipe(jshint.reporter(stylish));
 });
 

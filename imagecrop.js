@@ -1,4 +1,6 @@
-var ImageCrop = function (config) {
+window.ImageCrop = function (config) {
+  'use strict';
+
   var self = this,
       options = {},
       canvas = document.createElement('canvas'),
@@ -58,7 +60,7 @@ var ImageCrop = function (config) {
     var drawing = false,
         dragging = false;
 
-    if (!options.image) return;
+    if (!options.image) { return; }
 
     // position and style the canvas
     canvas.width = options.image.offsetWidth;
@@ -146,7 +148,7 @@ var ImageCrop = function (config) {
     }, false);
 
     // and handle mouse up
-    canvas.addEventListener('mouseup', function (e) {
+    canvas.addEventListener('mouseup', function () {
       // handle dragging from not the top left
       if (self.cropCoords.width < 0) {
         self.cropCoords.width = Math.abs(self.cropCoords.width);
