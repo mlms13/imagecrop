@@ -7,19 +7,12 @@ window.ImageCrop = function (config) {
       ctx = canvas.getContext('2d'),
       mouseLocation = false;
 
+  // expose cropCoords to the client, just in case
   this.cropCoords = {
     x: 0,
     y: 0,
     height: 0,
     width: 0
-  };
-  this.dragCoords = {
-    x: 0,
-    y: 0,
-    height: 0,
-    width: 0,
-    mouseX: 0,
-    mouseY: 0
   };
 
   // defaults for all options
@@ -76,7 +69,8 @@ window.ImageCrop = function (config) {
 
   // initialize, by converting the supplied image to a canvas
   this.init = function () {
-    var currentMouseState = false;
+    var currentMouseState = false,
+        dragCoords = {};
 
     if (!options.image) { return; }
 
@@ -99,26 +93,26 @@ window.ImageCrop = function (config) {
 
       if (currentMouseState === 'resizing') {
         if (mouseLocation === 'nw-resize') {
-          self.cropCoords.x = self.dragCoords.x;
-          self.cropCoords.y = self.dragCoords.y;
+          self.cropCoords.x = dragCoords.x;
+          self.cropCoords.y = dragCoords.y;
         } else if (mouseLocation === 'ne-resize') {
-          self.cropCoords.x = self.dragCoords.x;
-          self.cropCoords.y = self.dragCoords.y + self.dragCoords.height;
+          self.cropCoords.x = dragCoords.x;
+          self.cropCoords.y = dragCoords.y + dragCoords.height;
         } else if (mouseLocation === 'se-resize') {
-          self.cropCoords.x = self.dragCoords.x;
-          self.cropCoords.y = self.dragCoords.y;
+          self.cropCoords.x = dragCoords.x;
+          self.cropCoords.y = dragCoords.y;
         } else if (mouseLocation === 'sw-resize') {
-          self.cropCoords.x = self.dragCoords.x + self.dragCoords.width;
-          self.cropCoords.y = self.dragCoords.y;
+          self.cropCoords.x = dragCoords.x + dragCoords.width;
+          self.cropCoords.y = dragCoords.y;
         }
-        self.cropCoords.width = self.dragCoords.width + (canvasX - self.dragCoords.x - self.dragCoords.width);
-        self.cropCoords.height = self.dragCoords.height + (canvasY - self.dragCoords.y - self.dragCoords.height);
+        self.cropCoords.width = dragCoords.width + (canvasX - dragCoords.x - dragCoords.width);
+        self.cropCoords.height = dragCoords.height + (canvasY - dragCoords.y - dragCoords.height);
       } else if (currentMouseState === 'drawing') {
         self.cropCoords.width = canvasX - self.cropCoords.x;
         self.cropCoords.height = canvasY - self.cropCoords.y;
       } else if (currentMouseState === 'dragging') {
-        self.cropCoords.x = self.dragCoords.x + canvasX - self.dragCoords.x - self.dragCoords.mouseX;
-        self.cropCoords.y = self.dragCoords.y + canvasY - self.dragCoords.y - self.dragCoords.mouseY;
+        self.cropCoords.x = dragCoords.x + canvasX - dragCoords.x - dragCoords.mouseX;
+        self.cropCoords.y = dragCoords.y + canvasY - dragCoords.y - dragCoords.mouseY;
       }
 
       // collision detection
@@ -176,39 +170,39 @@ window.ImageCrop = function (config) {
 
       // check to see if we're clicking inside an existing selection
       if (mouseLocation === 'nw-resize') {
-        self.dragCoords.x = self.cropCoords.x + self.cropCoords.width;
-        self.dragCoords.y = self.cropCoords.y + self.cropCoords.height;
-        self.dragCoords.height = self.cropCoords.height * -1;
-        self.dragCoords.width = self.cropCoords.width * -1;
+        dragCoords.x = self.cropCoords.x + self.cropCoords.width;
+        dragCoords.y = self.cropCoords.y + self.cropCoords.height;
+        dragCoords.height = self.cropCoords.height * -1;
+        dragCoords.width = self.cropCoords.width * -1;
 
         currentMouseState = 'resizing';
       } else if (mouseLocation === 'ne-resize') {
-        self.dragCoords.x = self.cropCoords.x;
-        self.dragCoords.y = self.cropCoords.y + self.cropCoords.height * 2;
-        self.dragCoords.height = self.cropCoords.height * -1;
-        self.dragCoords.width = self.cropCoords.width;
+        dragCoords.x = self.cropCoords.x;
+        dragCoords.y = self.cropCoords.y + self.cropCoords.height * 2;
+        dragCoords.height = self.cropCoords.height * -1;
+        dragCoords.width = self.cropCoords.width;
 
         currentMouseState = 'resizing';
       } else if (mouseLocation === 'se-resize') {
-        self.dragCoords.x = self.cropCoords.x;
-        self.dragCoords.y = self.cropCoords.y;
-        self.dragCoords.height = self.cropCoords.height;
-        self.dragCoords.width = self.cropCoords.width;
+        dragCoords.x = self.cropCoords.x;
+        dragCoords.y = self.cropCoords.y;
+        dragCoords.height = self.cropCoords.height;
+        dragCoords.width = self.cropCoords.width;
 
         currentMouseState = 'resizing';
       } else if (mouseLocation === 'sw-resize') {
-        self.dragCoords.x = self.cropCoords.x + self.cropCoords.width * 2;
-        self.dragCoords.y = self.cropCoords.y;
-        self.dragCoords.height = self.cropCoords.height;
-        self.dragCoords.width = self.cropCoords.width * -1;
+        dragCoords.x = self.cropCoords.x + self.cropCoords.width * 2;
+        dragCoords.y = self.cropCoords.y;
+        dragCoords.height = self.cropCoords.height;
+        dragCoords.width = self.cropCoords.width * -1;
 
         currentMouseState = 'resizing';
       } else if (mouseLocation === 'selection') {
         // set the starting point for our drag
-        self.dragCoords.x = self.cropCoords.x;
-        self.dragCoords.y = self.cropCoords.y;
-        self.dragCoords.mouseX = canvasX - self.cropCoords.x;
-        self.dragCoords.mouseY = canvasY - self.cropCoords.y;
+        dragCoords.x = self.cropCoords.x;
+        dragCoords.y = self.cropCoords.y;
+        dragCoords.mouseX = canvasX - self.cropCoords.x;
+        dragCoords.mouseY = canvasY - self.cropCoords.y;
 
         currentMouseState = 'dragging';
       } else {
