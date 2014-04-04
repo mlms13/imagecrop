@@ -239,6 +239,11 @@ window.ImageCrop = function (config) {
 
   // update canvas with new size and save content as png
   this.save = function () {
+    // if a ratio is set after init, ratio wins over output width/height
+    if (options.outputWidth / options.outputHeight !== ratio) {
+      options.outputWidth = false;
+      options.outputHeight = false;
+    }
     // create a new canvas, real quick like
     var tmpCanvas = document.createElement('canvas'),
         tmpCtx = tmpCanvas.getContext('2d'),
