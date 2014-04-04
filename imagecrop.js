@@ -32,8 +32,9 @@ window.ImageCrop = function (config) {
                   options.outputWidth / options.outputHeight :
                   config.ratio || false;
   options.handleSize = config.handleSize || 10;
+  options.handleFill = config.handleFill || 'rgba(0, 0, 0, 0.65)';
 
-  function drawInitialState() {
+  function drawInitialState () {
     // clear everything on the canvas
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
@@ -42,7 +43,7 @@ window.ImageCrop = function (config) {
     ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
   }
 
-  function drawSelection() {
+  function drawSelection () {
     drawInitialState();
 
     // fix a ratio if required
@@ -64,6 +65,13 @@ window.ImageCrop = function (config) {
                   self.cropCoords.width, self.cropCoords.height,
                   self.cropCoords.x, self.cropCoords.y,
                   self.cropCoords.width, self.cropCoords.height);
+
+    // draw resize handles
+    ctx.fillStyle = options.handleFill;
+    ctx.fillRect(self.cropCoords.x - (options.handleSize / 2), self.cropCoords.y - (options.handleSize / 2), options.handleSize, options.handleSize);
+    ctx.fillRect(self.cropCoords.x + self.cropCoords.width - (options.handleSize / 2), self.cropCoords.y - (options.handleSize / 2), options.handleSize, options.handleSize);
+    ctx.fillRect(self.cropCoords.x - (options.handleSize / 2), self.cropCoords.y + self.cropCoords.height - (options.handleSize / 2), options.handleSize, options.handleSize);
+    ctx.fillRect(self.cropCoords.x + self.cropCoords.width - (options.handleSize / 2), self.cropCoords.y + self.cropCoords.height - (options.handleSize / 2), options.handleSize, options.handleSize);
   }
 
   // initialize, by converting the supplied image to a canvas
