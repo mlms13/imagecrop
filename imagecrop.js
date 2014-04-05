@@ -68,7 +68,7 @@ window.ImageCrop = function (config) {
   }
 
   // initialize, by converting the supplied image to a canvas
-  this.init = function () {
+  function init () {
     var currentMouseState = false,
         dragCoords = {};
 
@@ -215,7 +215,7 @@ window.ImageCrop = function (config) {
     }, false);
 
     // handle mouse up / mouse out
-    var endMouseMove = function () {
+    function endMouseMove () {
       // handle dragging from not the top left
       if (self.cropCoords.width < 0) {
         self.cropCoords.width = Math.abs(self.cropCoords.width);
@@ -230,6 +230,7 @@ window.ImageCrop = function (config) {
     canvas.addEventListener('mouseup', endMouseMove, false);
     canvas.addEventListener('mouseout', endMouseMove, false);
   };
+  init();
 
   // update canvas with new size and save content as png
   this.save = function () {
@@ -263,7 +264,7 @@ window.ImageCrop = function (config) {
     if (typeof prop === 'object') {
       // if an object is passed as the first parameter, loop through it
       for (objProp in prop) {
-        self.set(objProp, prop[objProp])
+        self.set(objProp, prop[objProp]);
       }
     } else {
       // otherwise assume we were given a property

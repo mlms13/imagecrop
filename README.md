@@ -27,9 +27,6 @@ Somewhere near the end of your document, include the `imagecrop.js` script and i
       // the target of the `load` event in this case
       image: e.target
     });
-    
-    // initialize
-    cropper.init();
   });
 </script>
 ```
@@ -38,9 +35,8 @@ Somewhere near the end of your document, include the `imagecrop.js` script and i
 
 | Method or Property | Result                                                       |
 |--------------------|--------------------------------------------------------------|
-| `init()`           | Creates the canvas and starts event listeners.               |
 | `save()`           | Returns a PNG image representing the current crop selection. |
-| `set(prop, val)`   | Update options after calling `init` by passing a property and value, or object containing multiple.|
+| `set(prop, val)`   | Update options after `init` by passing a property and value, or object containing multiple.|
 | `cropCoords`       | An object with `x`, `y`, `width`, and `height` properties related to the current crop selection.|
 
 ## Options
