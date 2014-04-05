@@ -38,6 +38,7 @@ Somewhere near the end of your document, include the `imagecrop.js` script and i
 | `save()`           | Returns a PNG image representing the current crop selection. |
 | `set(prop, val)`   | Update options after `init` by passing a property and value, or object containing multiple.|
 | `cropCoords`       | An object with `x`, `y`, `width`, and `height` properties related to the current crop selection.|
+| `drawSelection`    | Redraw the Canvas after you've changed `cropCoords`.         |
 
 ## Options
 
@@ -51,6 +52,8 @@ Somewhere near the end of your document, include the `imagecrop.js` script and i
 | `ratio`        | number  | `false`*                  | A fixed ratio representing `width` / `height`.  |
 | `handleSize`   | number  | `10`                      | Size in pixels of the square resize handles.    |
 | `handleFill`   | string  | `"rgba(0, 0, 0, 0.65)"`   | Fill color of resize handles.                   |
+| `keyboard`     | boolean | `true`                    | Allow keyboard interaction with the Canvas      |
+| `keyboardStep` | number  | `5`                       | Number of pixels the keyboard keys should move the selection. |
 
 * If an `outputWidth` and `outputHeight` are set, ratio will be set automatically, regardless of whether a `ratio` is passed to the constructor. Height and width win, but if a ratio is set later using the `.set()` method, height and width will be ignored when the image is saved (to avoid skewed images).
 

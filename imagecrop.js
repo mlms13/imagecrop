@@ -38,43 +38,6 @@ window.ImageCrop = function (config) {
     ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
   }
 
-  function drawSelection () {
-    drawInitialState();
-
-    // fix a ratio if required
-    if (options.ratio) {
-      var absWidth = Math.abs(self.cropCoords.width),
-          absHeight = Math.abs(self.cropCoords.height),
-          minSideLength = Math.min(absWidth / options.ratio, absHeight);
-
-      self.cropCoords.width = self.cropCoords.width < 0 ?
-                              -1 * minSideLength * options.ratio :
-                              minSideLength * options.ratio;
-
-      self.cropCoords.height = self.cropCoords.height < 0 ?
-                              -1 * minSideLength :
-                              minSideLength;
-    }
-
-    // collision detection
-    if (self.cropCoords.x < 0) self.cropCoords.x = 0;
-    if (self.cropCoords.y < 0) self.cropCoords.y = 0;
-    if (self.cropCoords.x + self.cropCoords.width > ctx.canvas.width) self.cropCoords.x = ctx.canvas.width - self.cropCoords.width;
-    if (self.cropCoords.y + self.cropCoords.height > ctx.canvas.height) self.cropCoords.y = ctx.canvas.height - self.cropCoords.height;
-
-    ctx.drawImage(options.image, self.cropCoords.x, self.cropCoords.y,
-                  self.cropCoords.width, self.cropCoords.height,
-                  self.cropCoords.x, self.cropCoords.y,
-                  self.cropCoords.width, self.cropCoords.height);
-
-    // draw resize handles
-    ctx.fillStyle = options.handleFill;
-    ctx.fillRect(self.cropCoords.x - (options.handleSize / 2), self.cropCoords.y - (options.handleSize / 2), options.handleSize, options.handleSize);
-    ctx.fillRect(self.cropCoords.x + self.cropCoords.width - (options.handleSize / 2), self.cropCoords.y - (options.handleSize / 2), options.handleSize, options.handleSize);
-    ctx.fillRect(self.cropCoords.x - (options.handleSize / 2), self.cropCoords.y + self.cropCoords.height - (options.handleSize / 2), options.handleSize, options.handleSize);
-    ctx.fillRect(self.cropCoords.x + self.cropCoords.width - (options.handleSize / 2), self.cropCoords.y + self.cropCoords.height - (options.handleSize / 2), options.handleSize, options.handleSize);
-  }
-
   // initialize, by converting the supplied image to a canvas
   function init () {
     var currentMouseState = false,
@@ -127,7 +90,7 @@ window.ImageCrop = function (config) {
 
           self.cropCoords.x += horizontal;
           self.cropCoords.y += vertical;
-          drawSelection();
+          self.drawSelection();
 
           e.preventDefault();
           e.stopPropagation();
@@ -166,7 +129,7 @@ window.ImageCrop = function (config) {
 
       if (currentMouseState) {
         // draw the selection box
-        drawSelection();
+        self.drawSelection();
       } else {
         // determine where the mouse is in the canvas selection
         if (canvasX > self.cropCoords.x - (options.handleSize / 2) &&
@@ -275,6 +238,43 @@ window.ImageCrop = function (config) {
   };
   init();
 
+  this.drawSelection = function () {
+    drawInitialState();
+
+    // fix a ratio if required
+    if (options.ratio) {
+      var absWidth = Math.abs(self.cropCoords.width),
+          absHeight = Math.abs(self.cropCoords.height),
+          minSideLength = Math.min(absWidth / options.ratio, absHeight);
+
+      self.cropCoords.width = self.cropCoords.width < 0 ?
+                              -1 * minSideLength * options.ratio :
+                              minSideLength * options.ratio;
+
+      self.cropCoords.height = self.cropCoords.height < 0 ?
+                              -1 * minSideLength :
+                              minSideLength;
+    }
+
+    // collision detection
+    if (self.cropCoords.x < 0) self.cropCoords.x = 0;
+    if (self.cropCoords.y < 0) self.cropCoords.y = 0;
+    if (self.cropCoords.x + self.cropCoords.width > ctx.canvas.width) self.cropCoords.x = ctx.canvas.width - self.cropCoords.width;
+    if (self.cropCoords.y + self.cropCoords.height > ctx.canvas.height) self.cropCoords.y = ctx.canvas.height - self.cropCoords.height;
+
+    ctx.drawImage(options.image, self.cropCoords.x, self.cropCoords.y,
+                  self.cropCoords.width, self.cropCoords.height,
+                  self.cropCoords.x, self.cropCoords.y,
+                  self.cropCoords.width, self.cropCoords.height);
+
+    // draw resize handles
+    ctx.fillStyle = options.handleFill;
+    ctx.fillRect(self.cropCoords.x - (options.handleSize / 2), self.cropCoords.y - (options.handleSize / 2), options.handleSize, options.handleSize);
+    ctx.fillRect(self.cropCoords.x + self.cropCoords.width - (options.handleSize / 2), self.cropCoords.y - (options.handleSize / 2), options.handleSize, options.handleSize);
+    ctx.fillRect(self.cropCoords.x - (options.handleSize / 2), self.cropCoords.y + self.cropCoords.height - (options.handleSize / 2), options.handleSize, options.handleSize);
+    ctx.fillRect(self.cropCoords.x + self.cropCoords.width - (options.handleSize / 2), self.cropCoords.y + self.cropCoords.height - (options.handleSize / 2), options.handleSize, options.handleSize);
+  };
+
   // update canvas with new size and save content as png
   this.save = function () {
     // if a ratio is set after init, ratio wins over output width/height
@@ -314,7 +314,7 @@ window.ImageCrop = function (config) {
       // update that property
       options[prop] = value;
       // and redraw
-      drawSelection();
+      self.drawSelection();
     }
   };
 };
