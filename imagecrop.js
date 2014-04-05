@@ -56,6 +56,12 @@ window.ImageCrop = function (config) {
                               minSideLength;
     }
 
+    // collision detection
+    if (self.cropCoords.x < 0) self.cropCoords.x = 0;
+    if (self.cropCoords.y < 0) self.cropCoords.y = 0;
+    if (self.cropCoords.x + self.cropCoords.width > ctx.canvas.width) self.cropCoords.x = ctx.canvas.width - self.cropCoords.width;
+    if (self.cropCoords.y + self.cropCoords.height > ctx.canvas.height) self.cropCoords.y = ctx.canvas.height - self.cropCoords.height;
+
     ctx.drawImage(options.image, self.cropCoords.x, self.cropCoords.y,
                   self.cropCoords.width, self.cropCoords.height,
                   self.cropCoords.x, self.cropCoords.y,
@@ -157,12 +163,6 @@ window.ImageCrop = function (config) {
         self.cropCoords.x = dragCoords.x + canvasX - dragCoords.x - dragCoords.mouseX;
         self.cropCoords.y = dragCoords.y + canvasY - dragCoords.y - dragCoords.mouseY;
       }
-
-      // collision detection
-      if (self.cropCoords.x < 0) self.cropCoords.x = 0;
-      if (self.cropCoords.y < 0) self.cropCoords.y = 0;
-      if (self.cropCoords.x + self.cropCoords.width > ctx.canvas.width) self.cropCoords.x = ctx.canvas.width - self.cropCoords.width;
-      if (self.cropCoords.y + self.cropCoords.height > ctx.canvas.height) self.cropCoords.y = ctx.canvas.height - self.cropCoords.height;
 
       if (currentMouseState) {
         // draw the selection box
