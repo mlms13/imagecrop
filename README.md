@@ -38,7 +38,7 @@ Somewhere near the end of your document, include the `imagecrop.js` script and i
 | `save()`           | Returns a PNG image representing the current crop selection. |
 | `set(prop, val)`   | Update options after `init` by passing a property and value, or object containing multiple.|
 | `cropCoords`       | An object with `x`, `y`, `width`, and `height` properties related to the current crop selection.|
-| `drawSelection`    | Redraw the Canvas after you've changed `cropCoords`.         |
+| `drawSelection()`  | Redraw the Canvas after you've changed `cropCoords`.         |
 
 ## Options
 
