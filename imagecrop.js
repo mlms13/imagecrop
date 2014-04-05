@@ -26,6 +26,8 @@ window.ImageCrop = function (config) {
                   config.ratio || false;
   options.handleSize = config.handleSize || 10;
   options.handleFill = config.handleFill || 'rgba(0, 0, 0, 0.65)';
+  options.keyboard = config.keyboard || true;
+  options.keyboardStep = config.keyboardStep || 5;
 
   function drawInitialState () {
     // clear everything on the canvas
@@ -85,6 +87,47 @@ window.ImageCrop = function (config) {
     // draw the image and hide the original image
     drawInitialState();
     options.image.style.visibility = 'hidden';
+
+    // allow changing selection position with keyboard
+    if (options.keyboard) {
+      var horizontal,
+          vertical;
+
+      canvas.setAttribute('tabindex', '1');
+      canvas.style.outline = 'none';
+      canvas.addEventListener('keydown', function (e) {
+        var stepValue;
+
+        if (e.keyCode >= 37 && e.keyCode <= 40) {
+          // Allow faster movement if shift key is down
+          if (e.shiftKey) {
+            stepValue = options.keyboardStep * 10;
+          } else {
+            stepValue = options.keyboardStep;
+          }
+          if (e.keyCode === 37) { // left
+            horizontal = - stepValue;
+            vertical = 0;
+          } else if (e.keyCode === 38) { // up
+            horizontal = 0;
+            vertical = - stepValue;
+          } else if (e.keyCode === 39) { // right
+            horizontal = stepValue;
+            vertical = 0;
+          } else if (e.keyCode === 40) { // down
+            horizontal = 0;
+            vertical = stepValue;
+          }
+
+          self.cropCoords.x += horizontal;
+          self.cropCoords.y += vertical;
+          drawSelection();
+
+          e.preventDefault();
+          e.stopPropagation();
+        }
+      }, false);
+    }
 
     // handle moving when the mouse is down
     canvas.addEventListener('mousemove', function (e) {
