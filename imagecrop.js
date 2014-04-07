@@ -108,8 +108,14 @@ window.ImageCrop = function (config) {
         self.cropCoords.x = dragCoords.x;
         self.cropCoords.y = dragCoords.y;
 
-        self.cropCoords.width = canvasX - self.cropCoords.x;
-        self.cropCoords.height = canvasY - self.cropCoords.y;
+        if (mouseLocation === 'n-resize' || mouseLocation === 's-resize') {
+          self.cropCoords.height = canvasY - self.cropCoords.y;
+        } else if (mouseLocation === 'w-resize' || mouseLocation === 'e-resize') {
+          self.cropCoords.width = canvasX - self.cropCoords.x;
+        } else {
+          self.cropCoords.width = canvasX - self.cropCoords.x;
+          self.cropCoords.height = canvasY - self.cropCoords.y;
+        }
       } else if (currentMouseState === 'drawing') {
         self.cropCoords.width = canvasX - self.cropCoords.x;
         self.cropCoords.height = canvasY - self.cropCoords.y;
@@ -147,6 +153,34 @@ window.ImageCrop = function (config) {
                    canvasY < self.cropCoords.y + self.cropCoords.height + (options.handleSize / 2)) {
           mouseLocation = 'sw-resize';
           canvas.style.cursor = 'nesw-resize';
+        } else if (!options.ratio &&
+                   canvasX > self.cropCoords.x + (self.cropCoords.width / 2) - (options.handleSize / 2) &&
+                   canvasX < self.cropCoords.x + (self.cropCoords.width / 2) + (options.handleSize / 2) &&
+                   canvasY > self.cropCoords.y - (options.handleSize / 2) &&
+                   canvasY < self.cropCoords.y + (options.handleSize / 2)) {
+                    mouseLocation = 'n-resize';
+                    canvas.style.cursor = 'ns-resize';
+        } else if (!options.ratio &&
+                   canvasX > self.cropCoords.x + self.cropCoords.width - (options.handleSize / 2) &&
+                   canvasX < self.cropCoords.x + self.cropCoords.width + (options.handleSize / 2) &&
+                   canvasY > self.cropCoords.y + (self.cropCoords.height / 2) - (options.handleSize / 2) &&
+                   canvasY < self.cropCoords.y + (self.cropCoords.height / 2) + (options.handleSize / 2)) {
+          mouseLocation = 'e-resize';
+          canvas.style.cursor = 'ew-resize';
+        } else if (!options.ratio &&
+                   canvasX > self.cropCoords.x + (self.cropCoords.width / 2) - (options.handleSize / 2) &&
+                   canvasX < self.cropCoords.x + (self.cropCoords.width / 2) + (options.handleSize / 2) &&
+                   canvasY > self.cropCoords.y + self.cropCoords.height - (options.handleSize / 2) &&
+                   canvasY < self.cropCoords.y + self.cropCoords.height + (options.handleSize / 2)) {
+          mouseLocation = 's-resize';
+          canvas.style.cursor = 'ns-resize';
+        } else if (!options.ratio &&
+                   canvasX > self.cropCoords.x - (options.handleSize / 2) &&
+                   canvasX < self.cropCoords.x + (options.handleSize / 2) &&
+                   canvasY > self.cropCoords.y + (self.cropCoords.height / 2) - (options.handleSize / 2) &&
+                   canvasY < self.cropCoords.y + (self.cropCoords.height / 2) + (options.handleSize / 2)) {
+          mouseLocation = 'w-resize';
+          canvas.style.cursor = 'ew-resize';
         } else if (canvasX > self.cropCoords.x &&
                    canvasX < self.cropCoords.x + self.cropCoords.width &&
                    canvasY > self.cropCoords.y &&
@@ -182,6 +216,12 @@ window.ImageCrop = function (config) {
           dragCoords.y = self.cropCoords.y + self.cropCoords.height;
           dragCoords.height = self.cropCoords.height * -1;
         } else if (mouseLocation === 'sw-resize') {
+          dragCoords.x = self.cropCoords.x + self.cropCoords.width;
+          dragCoords.width = self.cropCoords.width * -1;
+        } else if (mouseLocation === 'n-resize') {
+          dragCoords.y = self.cropCoords.y + self.cropCoords.height;
+          dragCoords.height = self.cropCoords.height * -1;
+        } else if (mouseLocation === 'w-resize') {
           dragCoords.x = self.cropCoords.x + self.cropCoords.width;
           dragCoords.width = self.cropCoords.width * -1;
         }        
@@ -257,6 +297,13 @@ window.ImageCrop = function (config) {
     ctx.fillRect(self.cropCoords.x + self.cropCoords.width - (options.handleSize / 2), self.cropCoords.y - (options.handleSize / 2), options.handleSize, options.handleSize);
     ctx.fillRect(self.cropCoords.x - (options.handleSize / 2), self.cropCoords.y + self.cropCoords.height - (options.handleSize / 2), options.handleSize, options.handleSize);
     ctx.fillRect(self.cropCoords.x + self.cropCoords.width - (options.handleSize / 2), self.cropCoords.y + self.cropCoords.height - (options.handleSize / 2), options.handleSize, options.handleSize);
+
+    if (!options.ratio) {
+      ctx.fillRect(self.cropCoords.x + (self.cropCoords.width / 2) - (options.handleSize / 2), self.cropCoords.y - (options.handleSize / 2), options.handleSize, options.handleSize);
+      ctx.fillRect(self.cropCoords.x + self.cropCoords.width - (options.handleSize / 2), self.cropCoords.y + (self.cropCoords.height / 2) - (options.handleSize / 2), options.handleSize, options.handleSize);
+      ctx.fillRect(self.cropCoords.x + (self.cropCoords.width / 2) - (options.handleSize / 2), self.cropCoords.y + self.cropCoords.height - (options.handleSize / 2), options.handleSize, options.handleSize);
+      ctx.fillRect(self.cropCoords.x - (options.handleSize / 2), self.cropCoords.y + (self.cropCoords.height / 2) - (options.handleSize / 2), options.handleSize, options.handleSize);
+    }
   };
 
   // update canvas with new size and save content as png
