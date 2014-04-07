@@ -118,14 +118,15 @@ window.ImageCrop = function (config) {
           self.cropCoords.x = dragCoords.x + dragCoords.width;
           self.cropCoords.y = dragCoords.y;
         }
-        self.cropCoords.width = dragCoords.width + (canvasX - dragCoords.x - dragCoords.width);
-        self.cropCoords.height = dragCoords.height + (canvasY - dragCoords.y - dragCoords.height);
+
+        self.cropCoords.width = canvasX - self.cropCoords.x;
+        self.cropCoords.height = canvasY - self.cropCoords.y;
       } else if (currentMouseState === 'drawing') {
         self.cropCoords.width = canvasX - self.cropCoords.x;
         self.cropCoords.height = canvasY - self.cropCoords.y;
       } else if (currentMouseState === 'dragging') {
-        self.cropCoords.x = dragCoords.x + canvasX - dragCoords.x - dragCoords.mouseX;
-        self.cropCoords.y = dragCoords.y + canvasY - dragCoords.y - dragCoords.mouseY;
+        self.cropCoords.x = canvasX - dragCoords.mouseX;
+        self.cropCoords.y = canvasY - dragCoords.mouseY;
       }
 
       if (currentMouseState) {
