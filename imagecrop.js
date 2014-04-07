@@ -16,25 +16,26 @@ window.ImageCrop = function (config) {
   };
 
   // defaults for all options
-  options.selector = config.selector || 'img.imagecrop';
-  options.image = config.image || document.querySelector(options.selector);
-  options.opacity = (config.opacity >= 0) ? config.opacity : 0.4;
-  options.outputWidth = config.outputWidth || false;
-  options.outputHeight = config.outputHeight || false;
-  options.ratio = (options.outputWidth && options.outputHeight) ?
-                  options.outputWidth / options.outputHeight :
-                  config.ratio || false;
-  options.handleSize = config.handleSize || 10;
-  options.handleFill = config.handleFill || 'rgba(0, 0, 0, 0.65)';
-  options.keyboard = config.keyboard || true;
-  options.keyboardStep = config.keyboardStep || 5;
+  options.selector      = config.selector || 'img.imagecrop';
+  options.image         = config.image || document.querySelector(options.selector);
+  options.initialFill   = config.initialFill || 'rgba(0, 0, 0, 0.1)';
+  options.activeFill    = config.activeFill || 'rgba(0, 0, 0, 0.6)';
+  options.outputWidth   = config.outputWidth || false;
+  options.outputHeight  = config.outputHeight || false;
+  options.ratio         = (options.outputWidth && options.outputHeight) ?
+                          options.outputWidth / options.outputHeight :
+                          config.ratio || false;
+  options.handleSize    = config.handleSize || 10;
+  options.handleFill    = config.handleFill || 'rgba(0, 0, 0, 0.65)';
+  options.keyboard      = config.keyboard || true;
+  options.keyboardStep  = config.keyboardStep || 5;
 
-  function drawInitialState () {
+  function drawInitialState ( state ) {
     // clear everything on the canvas
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
     ctx.drawImage(options.image, 0, 0);
-    ctx.fillStyle = 'rgba(0, 0, 0,' + options.opacity + ')';
+    ctx.fillStyle = options[state] || options.initialFill;
     ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
   }
 
@@ -232,14 +233,14 @@ window.ImageCrop = function (config) {
         self.cropCoords.y -= self.cropCoords.height;
       }
       currentMouseState = false;
-    };
+    }
     canvas.addEventListener('mouseup', endMouseMove, false);
     canvas.addEventListener('mouseout', endMouseMove, false);
-  };
+  }
   init();
 
   this.drawSelection = function () {
-    drawInitialState();
+    drawInitialState( 'activeFill' );
 
     // fix a ratio if required
     if (options.ratio) {
