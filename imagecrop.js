@@ -5,7 +5,7 @@ window.ImageCrop = function (config) {
       options = {},
       canvas = document.createElement('canvas'),
       ctx = canvas.getContext('2d'),
-      mouseLocation = false;
+      mouseLocation = '';
 
   // expose cropCoords to the client, just in case
   this.cropCoords = {
@@ -154,7 +154,7 @@ window.ImageCrop = function (config) {
           mouseLocation = 'selection';
           canvas.style.cursor = 'move';
         } else {
-          mouseLocation = false;
+          mouseLocation = '';
           canvas.style.cursor = 'crosshair';
         }
       }
@@ -165,33 +165,26 @@ window.ImageCrop = function (config) {
       var canvasX = e.pageX - canvas.offsetLeft,
           canvasY = e.pageY - canvas.offsetTop;
 
-      // check to see if we're clicking inside an existing selection
-      if (mouseLocation === 'nw-resize') {
-        dragCoords.x = self.cropCoords.x + self.cropCoords.width;
-        dragCoords.y = self.cropCoords.y + self.cropCoords.height;
-        dragCoords.height = self.cropCoords.height * -1;
-        dragCoords.width = self.cropCoords.width * -1;
+      // check to see if we're resizing
 
-        currentMouseState = 'resizing';
-      } else if (mouseLocation === 'ne-resize') {
-        dragCoords.x = self.cropCoords.x;
-        dragCoords.y = self.cropCoords.y + self.cropCoords.height;
-        dragCoords.height = self.cropCoords.height * -1;
-        dragCoords.width = self.cropCoords.width;
-
-        currentMouseState = 'resizing';
-      } else if (mouseLocation === 'se-resize') {
+      if (mouseLocation.indexOf('resize') > -1) {
         dragCoords.x = self.cropCoords.x;
         dragCoords.y = self.cropCoords.y;
         dragCoords.height = self.cropCoords.height;
         dragCoords.width = self.cropCoords.width;
 
-        currentMouseState = 'resizing';
-      } else if (mouseLocation === 'sw-resize') {
-        dragCoords.x = self.cropCoords.x + self.cropCoords.width;
-        dragCoords.y = self.cropCoords.y;
-        dragCoords.height = self.cropCoords.height;
-        dragCoords.width = self.cropCoords.width * -1;
+        if (mouseLocation === 'nw-resize') {
+          dragCoords.x = self.cropCoords.x + self.cropCoords.width;
+          dragCoords.y = self.cropCoords.y + self.cropCoords.height;
+          dragCoords.height = self.cropCoords.height * -1;
+          dragCoords.width = self.cropCoords.width * -1;
+        } else if (mouseLocation === 'ne-resize') {
+          dragCoords.y = self.cropCoords.y + self.cropCoords.height;
+          dragCoords.height = self.cropCoords.height * -1;
+        } else if (mouseLocation === 'sw-resize') {
+          dragCoords.x = self.cropCoords.x + self.cropCoords.width;
+          dragCoords.width = self.cropCoords.width * -1;
+        }        
 
         currentMouseState = 'resizing';
       } else if (mouseLocation === 'selection') {
