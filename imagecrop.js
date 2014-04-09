@@ -31,6 +31,7 @@ window.ImageCrop = function (config) {
   options.keyboardStep  = config.keyboardStep || 5;
   options.imageType     = config.imageType || 'image/png';
   options.imageQuality  = config.imageQuality || 1.0;
+  options.dragThreshold = config.dragThreshold || 1;
 
   function drawInitialState ( state ) {
     // clear everything on the canvas
@@ -265,7 +266,11 @@ window.ImageCrop = function (config) {
   init();
 
   this.drawSelection = function () {
-    drawInitialState( 'activeFill' );
+    if (self.cropCoords.width < options.dragThreshold &&
+        self.cropCoords.height < options.dragThreshold) {
+      // Onlow show the canvas as active if we've actually drawn something
+      drawInitialState( 'activeFill' );
+    }
 
     // fix a ratio if required
     if (options.ratio) {
@@ -285,8 +290,12 @@ window.ImageCrop = function (config) {
     // collision detection
     if (self.cropCoords.x < 0) self.cropCoords.x = 0;
     if (self.cropCoords.y < 0) self.cropCoords.y = 0;
-    if (self.cropCoords.x + self.cropCoords.width > ctx.canvas.width) self.cropCoords.x = ctx.canvas.width - self.cropCoords.width;
-    if (self.cropCoords.y + self.cropCoords.height > ctx.canvas.height) self.cropCoords.y = ctx.canvas.height - self.cropCoords.height;
+    if (self.cropCoords.x + self.cropCoords.width > ctx.canvas.width) {
+      self.cropCoords.x = ctx.canvas.width - self.cropCoords.width;
+    }
+    if (self.cropCoords.y + self.cropCoords.height > ctx.canvas.height) {
+      self.cropCoords.y = ctx.canvas.height - self.cropCoords.height;
+    }
 
     ctx.drawImage(options.image, self.cropCoords.x, self.cropCoords.y,
                   self.cropCoords.width, self.cropCoords.height,
@@ -295,16 +304,32 @@ window.ImageCrop = function (config) {
 
     // draw resize handles
     ctx.fillStyle = options.handleFill;
-    ctx.fillRect(self.cropCoords.x - (options.handleSize / 2), self.cropCoords.y - (options.handleSize / 2), options.handleSize, options.handleSize);
-    ctx.fillRect(self.cropCoords.x + self.cropCoords.width - (options.handleSize / 2), self.cropCoords.y - (options.handleSize / 2), options.handleSize, options.handleSize);
-    ctx.fillRect(self.cropCoords.x - (options.handleSize / 2), self.cropCoords.y + self.cropCoords.height - (options.handleSize / 2), options.handleSize, options.handleSize);
-    ctx.fillRect(self.cropCoords.x + self.cropCoords.width - (options.handleSize / 2), self.cropCoords.y + self.cropCoords.height - (options.handleSize / 2), options.handleSize, options.handleSize);
+    ctx.fillRect(self.cropCoords.x - (options.handleSize / 2),
+                 self.cropCoords.y - (options.handleSize / 2),
+                 options.handleSize, options.handleSize);
+    ctx.fillRect(self.cropCoords.x + self.cropCoords.width - (options.handleSize / 2),
+                 self.cropCoords.y - (options.handleSize / 2),
+                 options.handleSize, options.handleSize);
+    ctx.fillRect(self.cropCoords.x - (options.handleSize / 2),
+                 self.cropCoords.y + self.cropCoords.height - (options.handleSize / 2),
+                 options.handleSize, options.handleSize);
+    ctx.fillRect(self.cropCoords.x + self.cropCoords.width - (options.handleSize / 2),
+                 self.cropCoords.y + self.cropCoords.height - (options.handleSize / 2),
+                 options.handleSize, options.handleSize);
 
     if (!options.ratio) {
-      ctx.fillRect(self.cropCoords.x + (self.cropCoords.width / 2) - (options.handleSize / 2), self.cropCoords.y - (options.handleSize / 2), options.handleSize, options.handleSize);
-      ctx.fillRect(self.cropCoords.x + self.cropCoords.width - (options.handleSize / 2), self.cropCoords.y + (self.cropCoords.height / 2) - (options.handleSize / 2), options.handleSize, options.handleSize);
-      ctx.fillRect(self.cropCoords.x + (self.cropCoords.width / 2) - (options.handleSize / 2), self.cropCoords.y + self.cropCoords.height - (options.handleSize / 2), options.handleSize, options.handleSize);
-      ctx.fillRect(self.cropCoords.x - (options.handleSize / 2), self.cropCoords.y + (self.cropCoords.height / 2) - (options.handleSize / 2), options.handleSize, options.handleSize);
+      ctx.fillRect(self.cropCoords.x + (self.cropCoords.width / 2) - (options.handleSize / 2),
+                   self.cropCoords.y - (options.handleSize / 2),
+                   options.handleSize, options.handleSize);
+      ctx.fillRect(self.cropCoords.x + self.cropCoords.width - (options.handleSize / 2),
+                   self.cropCoords.y + (self.cropCoords.height / 2) - (options.handleSize / 2),
+                   options.handleSize, options.handleSize);
+      ctx.fillRect(self.cropCoords.x + (self.cropCoords.width / 2) - (options.handleSize / 2),
+                   self.cropCoords.y + self.cropCoords.height - (options.handleSize / 2),
+                   options.handleSize, options.handleSize);
+      ctx.fillRect(self.cropCoords.x - (options.handleSize / 2),
+                   self.cropCoords.y + (self.cropCoords.height / 2) - (options.handleSize / 2),
+                   options.handleSize, options.handleSize);
     }
   };
 
