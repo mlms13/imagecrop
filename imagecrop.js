@@ -268,7 +268,7 @@ window.ImageCrop = function (config) {
   this.drawSelection = function () {
     if (self.cropCoords.width < options.dragThreshold &&
         self.cropCoords.height < options.dragThreshold) {
-      // Onlow show the canvas as active if we've actually drawn something
+      // only show the canvas as active if we've actually drawn something
       drawInitialState( 'activeFill' );
     }
 
