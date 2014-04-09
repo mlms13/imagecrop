@@ -158,8 +158,8 @@ window.ImageCrop = function (config) {
                    canvasX < self.cropCoords.x + (self.cropCoords.width / 2) + (options.handleSize / 2) &&
                    canvasY > self.cropCoords.y - (options.handleSize / 2) &&
                    canvasY < self.cropCoords.y + (options.handleSize / 2)) {
-                    mouseLocation = 'n-resize';
-                    canvas.style.cursor = 'ns-resize';
+          mouseLocation = 'n-resize';
+          canvas.style.cursor = 'ns-resize';
         } else if (!options.ratio &&
                    canvasX > self.cropCoords.x + self.cropCoords.width - (options.handleSize / 2) &&
                    canvasX < self.cropCoords.x + self.cropCoords.width + (options.handleSize / 2) &&
