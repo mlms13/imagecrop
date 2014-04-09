@@ -266,10 +266,13 @@ window.ImageCrop = function (config) {
   init();
 
   this.drawSelection = function () {
-    if (self.cropCoords.width < options.dragThreshold &&
-        self.cropCoords.height < options.dragThreshold) {
+    if (Math.abs(self.cropCoords.width) > options.dragThreshold &&
+        Math.abs(self.cropCoords.height) > options.dragThreshold) {
       // only show the canvas as active if we've actually drawn something
-      drawInitialState( 'activeFill' );
+      drawInitialState('activeFill');
+    } else {
+      drawInitialState();
+      return;
     }
 
     // fix a ratio if required
@@ -336,7 +339,8 @@ window.ImageCrop = function (config) {
   // update canvas with new size and save content as png
   this.save = function () {
     // if width and height aren't set, save the whole image
-    if (self.cropCoords.width === 0 && self.cropCoords.height === 0) {
+    if (Math.abs(self.cropCoords.width) <= options.dragThreshold ||
+        Math.abs(self.cropCoords.height) <= options.dragThreshold) {
       return canvas.toDataURL(options.imageType, options.imageQuality);
     }
     // if a ratio is set after init, ratio wins over output width/height
