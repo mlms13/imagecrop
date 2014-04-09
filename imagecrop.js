@@ -308,6 +308,10 @@ window.ImageCrop = function (config) {
 
   // update canvas with new size and save content as png
   this.save = function () {
+    // if width and height aren't set, save the whole image
+    if (self.cropCoords.width === 0 && self.cropCoords.height === 0) {
+      return canvas.toDataURL();
+    }
     // if a ratio is set after init, ratio wins over output width/height
     if (options.outputWidth / options.outputHeight !== options.ratio) {
       options.outputWidth = false;
