@@ -29,6 +29,8 @@ window.ImageCrop = function (config) {
   options.handleFill    = config.handleFill || 'rgba(0, 0, 0, 0.65)';
   options.keyboard      = config.keyboard || true;
   options.keyboardStep  = config.keyboardStep || 5;
+  options.imageType     = config.imageType || 'image/png';
+  options.imageQuality  = config.imageQuality || 1.0;
 
   function drawInitialState ( state ) {
     // clear everything on the canvas
@@ -310,7 +312,7 @@ window.ImageCrop = function (config) {
   this.save = function () {
     // if width and height aren't set, save the whole image
     if (self.cropCoords.width === 0 && self.cropCoords.height === 0) {
-      return canvas.toDataURL();
+      return canvas.toDataURL(options.imageType, options.imageQuality);
     }
     // if a ratio is set after init, ratio wins over output width/height
     if (options.outputWidth / options.outputHeight !== options.ratio) {
@@ -332,7 +334,7 @@ window.ImageCrop = function (config) {
                      self.cropCoords.width, self.cropCoords.height, 0, 0,
                      tmpWidth, tmpHeight);
 
-    return tmpCanvas.toDataURL();
+    return tmpCanvas.toDataURL(options.imageType, options.imageQuality);
   };
 
   // allow changing the options after the plugin has loaded
