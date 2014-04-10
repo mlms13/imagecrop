@@ -227,7 +227,7 @@ window.ImageCrop = function (config) {
         } else if (mouseLocation === 'w-resize') {
           dragCoords.x = self.cropCoords.x + self.cropCoords.width;
           dragCoords.width = self.cropCoords.width * -1;
-        }        
+        }
 
         currentMouseState = 'resizing';
       } else if (mouseLocation === 'selection') {
@@ -291,8 +291,8 @@ window.ImageCrop = function (config) {
     }
 
     // collision detection
-    if (self.cropCoords.x < 0) self.cropCoords.x = 0;
-    if (self.cropCoords.y < 0) self.cropCoords.y = 0;
+    if (self.cropCoords.x < 0) { self.cropCoords.x = 0; }
+    if (self.cropCoords.y < 0) { self.cropCoords.y = 0; }
     if (self.cropCoords.x + self.cropCoords.width > ctx.canvas.width) {
       self.cropCoords.x = ctx.canvas.width - self.cropCoords.width;
     }
