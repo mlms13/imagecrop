@@ -81,8 +81,10 @@
             for (objProp in prop) {
                 this.set(objProp, prop[objProp]);
             }
-        } else {
-            // otherwise assume we were given a property and update it
+        }
+
+        // otherwise assume we were given a property and update it
+        else {
             this._options[prop] = value;
         }
     };
