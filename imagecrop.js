@@ -56,7 +56,8 @@
      * Set globals so the canvases can be accessed
      */
     proto.init = function () {
-        var options = this.getOptions();
+        var options = this.getOptions(),
+            self = this;
 
         // Set the image variable globally
         this.image = document.querySelector(options.selector);
@@ -64,9 +65,17 @@
         // Set up and position the base layer canvas
         var baseCanvas = this.createLayer('base');
 
-        baseCanvas.draw = function () {
-            //
-        }
+        baseCanvas.draw = function (layer, image) {
+            // clear everything on the canvas
+            layer.ctx.clearRect(0, 0, layer.ctx.canvas.width, layer.ctx.canvas.height);
+
+            // Draw the image on the canvas
+            layer.ctx.drawImage(self.image, 0, 0);
+
+            // Draw a light backdrop on the image
+            layer.ctx.fillStyle = options.initialFill;
+            layer.ctx.fillRect(0, 0, layer.ctx.canvas.width, layer.ctx.canvas.height);
+        };
 
         // Draw the image on the canvas
         this.draw();
@@ -82,6 +91,16 @@
      */
     proto.createLayer = function (layer) {
 
+        // Set the canvas object if it isn't set
+        if (!this.canvas) {
+            this.canvas = {};
+        }
+
+        // Set the layer object if it isn't set
+        if (!this.canvas[layer]) {
+            this.canvas[layer] = {};
+        }
+
         // If layer is an array, then loop through and create all layers
         if (layer instanceof Array) {
             var layers = {};
@@ -94,7 +113,7 @@
         }
 
         // Set the canvas up for the named layer
-        else if (!layer) {
+        else if (layer) {
             // Create the canvas element
             this.canvas[layer].canvas = document.createElement('canvas');
             this.canvas[layer].ctx = this.canvas[layer].canvas.getContext('2d');
@@ -107,14 +126,14 @@
             this.canvas[layer].canvas.style.left     = this.image.offsetLeft + 'px';
 
             // Function that the draw method will call, make sure to override
-            this.canvas[layer].draw = function () {};
+            this.canvas[layer].draw = function (layer) {};
 
             // Add the canvas to the body
             document.body.appendChild(this.canvas[layer].canvas);
 
             return this.canvas[layer];
         }
-    }
+    };
 
     /**
      * Draw the canvases, if a layer is specified, only draw that layer
@@ -139,7 +158,7 @@
 
         // Draw the canvas for the named layer
         else {
-            this.canvas[layer].draw();
+            this.canvas[layer].draw(this.canvas[layer]);
         }
 
     };
