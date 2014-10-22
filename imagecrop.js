@@ -63,6 +63,16 @@
 
         // Set up and position the base layer canvas
         var baseCanvas = this.createLayer('base');
+
+        baseCanvas.draw = function () {
+            //
+        }
+
+        // Draw the image on the canvas
+        this.draw();
+
+        // Hide the original image
+        this.image.style.visibility = 'hidden';
     };
 
     /**
@@ -96,14 +106,11 @@
             this.canvas[layer].canvas.style.top      = this.image.offsetTop + 'px';
             this.canvas[layer].canvas.style.left     = this.image.offsetLeft + 'px';
 
+            // Function that the draw method will call, make sure to override
+            this.canvas[layer].draw = function () {};
+
             // Add the canvas to the body
             document.body.appendChild(this.canvas[layer].canvas);
-
-            // Draw the image on the canvas
-            this.draw();
-
-            // Hide the original image
-            this.image.style.visibility = 'hidden';
 
             return this.canvas[layer];
         }
@@ -123,15 +130,18 @@
             }
         }
 
-        // Draw the canvas for the named layer
+        // If no layer is specified, draw all layers
         else if (!layer) {
-            //
+            for (layer in this.canvas) {
+                this.draw(layer);
+            }
         }
 
-        // If no layer is specified, draw all layers
+        // Draw the canvas for the named layer
         else {
-            //
+            this.canvas[layer].draw();
         }
+
     };
 
     /**
