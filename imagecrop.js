@@ -56,7 +56,71 @@
      * Set globals so the canvases can be accessed
      */
     proto.init = function () {
-        //
+        var options = this.getOptions();
+
+        // Set the image variable globally
+        this.image = document.querySelector(options.selector);
+
+        // Set up and position the base layer canvas
+        var baseCanvas = this.createLayer('base');
+    };
+
+    /**
+     * Create the canvas elements and assign them to globals
+     *
+     * @param {string|array} Layer name as a string, or an array of layers
+     */
+    proto.createLayer = function (layer) {
+
+        // If layer is an array, then loop through and create all layers
+        if (layer instanceof Array) {
+            for (var i = 0; i < layer.length; i++) {
+                this.createLayer(layer[i]);
+            }
+        }
+
+        // Set the canvas up for the named layer
+        else {
+            // Create the canvas element
+            this.canvas[layer].canvas = document.createElement('canvas');
+            this.canvas[layer].ctx = this.canvas[layer].canvas.getContext('2d');
+
+            // Set the canvas to sit in place of the original image
+            this.canvas[layer].canvas.width          = this.image.offsetWidth;
+            this.canvas[layer].canvas.height         = this.image.offsetHeight;
+            this.canvas[layer].canvas.style.position = 'absolute';
+            this.canvas[layer].canvas.style.top      = this.image.offsetTop + 'px';
+            this.canvas[layer].canvas.style.left     = this.image.offsetLeft + 'px';
+
+            // Add the canvas to the body
+            document.body.appendChild(this.canvas[layer].canvas);
+
+            // Draw the image on the canvas
+            this.draw();
+
+            // Hide the original image
+            this.image.style.visibility = 'hidden';
+        }
+    }
+
+    /**
+     * Draw the canvases, if a layer is specified, only draw that layer
+     *
+     * @param {string|array} Layer name as a string, or an array of layers
+     */
+    proto.draw = function (layer) {
+
+        // If layer is an array, then loop through and draw all layers
+        if (layer instanceof Array) {
+            for (var i = 0; i < layer.length; i++) {
+                this.draw(layer[i]);
+            }
+        }
+
+        // Draw the canvas for the named layer
+        else {
+            //
+        }
     };
 
     /**
