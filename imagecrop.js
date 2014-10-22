@@ -203,7 +203,7 @@
             self = this,
             canvas = this.canvas.selection.canvas,
             dragCoords = {},
-            currentMouseState, mouseLocation;
+            currentMouseState, mouseLocation, resizeRatio;
 
         // Allow changing selection position with keyboard
         if (options.keyboard) {
@@ -282,8 +282,26 @@
                 } else if (mouseLocation === 'w-resize' || mouseLocation === 'e-resize') {
                     self.cropCoords.width = canvasX - self.cropCoords.x;
                 } else {
-                    self.cropCoords.width = canvasX - self.cropCoords.x;
-                    self.cropCoords.height = canvasY - self.cropCoords.y;
+
+                    // If shift is held, keep a ratio
+                    if (e.shiftKey) {
+
+                        // Set the ratio if one isn't set
+                        if (!resizeRatio) {
+                            resizeRatio = Math.abs((canvasX - self.cropCoords.x) / (canvasY - self.cropCoords.y));
+                        }
+
+                        var direction = (canvasX - self.cropCoords.x < 0) ? -1 : 1;
+
+                        self.cropCoords.width = Math.abs(canvasY - self.cropCoords.y) * resizeRatio * direction;
+                        self.cropCoords.height = canvasY - self.cropCoords.y;
+                    } else {
+                        self.cropCoords.width = canvasX - self.cropCoords.x;
+                        self.cropCoords.height = canvasY - self.cropCoords.y;
+
+                        // Reset the ratio
+                        resizeRatio = false;
+                    }
                 }
             } else if (currentMouseState === 'drawing') {
                 self.cropCoords.width = canvasX - self.cropCoords.x;
