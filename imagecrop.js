@@ -476,7 +476,7 @@
             this.canvas[layer].draw = function (layer) {};
 
             // Add the canvas to the body
-            this.image.parentNode.insertBefore(this.canvas[layer].canvas, this.image.nextSibling);
+            document.body.appendChild(this.canvas[layer].canvas);
 
             return this.canvas[layer];
         }
