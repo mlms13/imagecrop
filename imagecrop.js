@@ -41,6 +41,16 @@
     };
 
     /**
+     * Coordinates used when cropping the image
+     */
+    proto.cropCoords = {
+        x: 0,
+        y: 0,
+        width: 0,
+        height: 0
+    };
+
+    /**
      * Return the object containing options
      * If one doesn't exist, set them to the default
      *
@@ -91,13 +101,6 @@
     proto.initSelection = function () {
         var options = this.getOptions(),
             self = this;
-
-        this.cropCoords = {
-            x: 0,
-            y: 0,
-            height: 0,
-            width: 0
-        };
 
         // Set up and position the selection layer canvas
         var selectionCanvas = this.createLayer('selection');
