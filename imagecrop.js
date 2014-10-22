@@ -224,14 +224,14 @@
 
                     // Left
                     if (e.keyCode === 37) {
-                        horizontal = - stepValue;
+                        horizontal = stepValue * -1;
                         vertical = 0;
                     }
 
                     // Up
                     else if (e.keyCode === 38) {
                         horizontal = 0;
-                        vertical = - stepValue;
+                        vertical = stepValue * -1;
                     }
 
                     // Right
