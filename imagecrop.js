@@ -104,35 +104,42 @@
         // Set up and position the selection layer canvas
         var selectionCanvas = this.createLayer('selection');
 
-        // If the selection is larger than the threshold, draw the selection
-        if (Math.min(this.cropCoords.height, this.cropCoords.width) > options.dragThreshold) {
+        // If we're allowing keyboard controls, the canvas needs to be targetable
+        if (options.keyboard) {
+            selectionCanvas.canvas.setAttribute('tabindex', '1');
+            selectionCanvas.canvas.style.outline = 'none';
+        }
 
-            // Fix a ratio if required
-            if (options.ratio) {
-                var absWidth = Math.abs(this.cropCoords.width),
-                    absHeight = Math.abs(this.cropCoords.height),
-                    minSideLength = Math.min(absWidth / options.ratio, absHeight);
+        selectionCanvas.draw = function (layer) {
 
-                this.cropCoords.width = this.cropCoords.width < 0 ?
-                                        -1 * minSideLength * options.ratio :
-                                        minSideLength * options.ratio;
+            // If the selection is larger than the threshold, draw the selection
+            if (Math.min(Math.abs(self.cropCoords.height), Math.abs(self.cropCoords.width)) > options.dragThreshold) {
 
-                this.cropCoords.height = this.cropCoords.height < 0 ?
-                                        -1 * minSideLength :
-                                        minSideLength;
-            }
+                // Fix a ratio if required
+                if (options.ratio) {
+                    var absWidth = Math.abs(self.cropCoords.width),
+                        absHeight = Math.abs(self.cropCoords.height),
+                        minSideLength = Math.min(absWidth / options.ratio, absHeight);
 
-            // Collision detection
-            if (this.cropCoords.x < 0) { this.cropCoords.x = 0; }
-            if (this.cropCoords.y < 0) { this.cropCoords.y = 0; }
-            if (this.cropCoords.x + this.cropCoords.width > selectionCanvas.ctx.canvas.width) {
-                this.cropCoords.x = selectionCanvas.ctx.canvas.width - this.cropCoords.width;
-            }
-            if (this.cropCoords.y + this.cropCoords.height > selectionCanvas.ctx.canvas.height) {
-                this.cropCoords.y = selectionCanvas.ctx.canvas.height - this.cropCoords.height;
-            }
+                    self.cropCoords.width = self.cropCoords.width < 0 ?
+                                            -1 * minSideLength * options.ratio :
+                                            minSideLength * options.ratio;
 
-            selectionCanvas.draw = function (layer) {
+                    self.cropCoords.height = self.cropCoords.height < 0 ?
+                                            -1 * minSideLength :
+                                            minSideLength;
+                }
+
+                // Collision detection
+                if (self.cropCoords.x < 0) { self.cropCoords.x = 0; }
+                if (self.cropCoords.y < 0) { self.cropCoords.y = 0; }
+                if (self.cropCoords.x + self.cropCoords.width > selectionCanvas.ctx.canvas.width) {
+                    self.cropCoords.x = selectionCanvas.ctx.canvas.width - self.cropCoords.width;
+                }
+                if (self.cropCoords.y + self.cropCoords.height > selectionCanvas.ctx.canvas.height) {
+                    self.cropCoords.y = selectionCanvas.ctx.canvas.height - self.cropCoords.height;
+                }
+
                 // Clear everything on the canvas
                 layer.ctx.clearRect(0, 0, layer.ctx.canvas.width, layer.ctx.canvas.height);
 
@@ -178,16 +185,13 @@
                                        self.cropCoords.y + (self.cropCoords.height / 2) - (options.handleSize / 2),
                                        options.handleSize, options.handleSize);
                 }
+            }
 
-            };
-        }
-
-        // If the selection is too small, clear the selection
-        else {
-            selectionCanvas.draw = function (layer) {
+            // If the selection is too small, clear the selection
+            else {
                 layer.ctx.clearRect(0, 0, layer.ctx.canvas.width, layer.ctx.canvas.height);
-            };
-        }
+            }
+        };
 
         // Finally draw the selection layer
         this.draw('selection');
@@ -197,7 +201,222 @@
      * Initialize mouse and keyboard events
      */
     proto.initEvents = function () {
-        //
+        var options = this.getOptions(),
+            self = this,
+            canvas = this.canvas.selection.canvas,
+            dragCoords = {},
+            currentMouseState, mouseLocation;
+
+        // Allow changing selection position with keyboard
+        if (options.keyboard) {
+            var horizontal,
+                vertical;
+
+            canvas.addEventListener('keydown', function (e) {
+                var stepValue;
+
+                if (e.keyCode >= 37 && e.keyCode <= 40) {
+
+                    // Allow faster movement if shift key is down
+                    if (e.shiftKey) {
+                        stepValue = options.keyboardStep * 10;
+                    } else {
+                        stepValue = options.keyboardStep;
+                    }
+
+                    // Left
+                    if (e.keyCode === 37) {
+                        horizontal = - stepValue;
+                        vertical = 0;
+                    }
+
+                    // Up
+                    else if (e.keyCode === 38) {
+                        horizontal = 0;
+                        vertical = - stepValue;
+                    }
+
+                    // Right
+                    else if (e.keyCode === 39) {
+                        horizontal = stepValue;
+                        vertical = 0;
+                    }
+
+                    // Down
+                    else if (e.keyCode === 40) {
+                        horizontal = 0;
+                        vertical = stepValue;
+                    }
+
+                    self.cropCoords.x += horizontal;
+                    self.cropCoords.y += vertical;
+                    self.draw('selection');
+
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
+            }, false);
+        }
+
+        // handle moving when the mouse is down
+        canvas.addEventListener('mousemove', function (e) {
+            var canvasX = e.pageX - canvas.offsetLeft,
+                canvasY = e.pageY - canvas.offsetTop;
+
+            if (currentMouseState === 'resizing') {
+                self.cropCoords.x = dragCoords.x;
+                self.cropCoords.y = dragCoords.y;
+
+                if (mouseLocation === 'n-resize' || mouseLocation === 's-resize') {
+                    self.cropCoords.height = canvasY - self.cropCoords.y;
+                } else if (mouseLocation === 'w-resize' || mouseLocation === 'e-resize') {
+                    self.cropCoords.width = canvasX - self.cropCoords.x;
+                } else {
+                    self.cropCoords.width = canvasX - self.cropCoords.x;
+                    self.cropCoords.height = canvasY - self.cropCoords.y;
+                }
+            } else if (currentMouseState === 'drawing') {
+                self.cropCoords.width = canvasX - self.cropCoords.x;
+                self.cropCoords.height = canvasY - self.cropCoords.y;
+            } else if (currentMouseState === 'dragging') {
+                self.cropCoords.x = canvasX - dragCoords.mouseX;
+                self.cropCoords.y = canvasY - dragCoords.mouseY;
+            }
+
+            if (currentMouseState) {
+                // draw the selection box
+                self.draw('selection');
+            } else {
+                // determine where the mouse is in the canvas selection
+                if (canvasX > self.cropCoords.x - (options.handleSize / 2) &&
+                    canvasX < self.cropCoords.x + (options.handleSize / 2) &&
+                    canvasY > self.cropCoords.y - (options.handleSize / 2) &&
+                    canvasY < self.cropCoords.y + (options.handleSize / 2)) {
+                        mouseLocation = 'nw-resize';
+                        canvas.style.cursor = 'nwse-resize';
+                } else if (canvasX > self.cropCoords.x + self.cropCoords.width - (options.handleSize / 2) &&
+                    canvasX < self.cropCoords.x + self.cropCoords.width + (options.handleSize / 2) &&
+                    canvasY > self.cropCoords.y - (options.handleSize / 2) &&
+                    canvasY < self.cropCoords.y + (options.handleSize / 2)) {
+                        mouseLocation = 'ne-resize';
+                        canvas.style.cursor = 'nesw-resize';
+                } else if (canvasX > self.cropCoords.x + self.cropCoords.width - (options.handleSize / 2) &&
+                    canvasX < self.cropCoords.x + self.cropCoords.width + (options.handleSize / 2) &&
+                    canvasY > self.cropCoords.y + self.cropCoords.height - (options.handleSize / 2) &&
+                    canvasY < self.cropCoords.y + self.cropCoords.height + (options.handleSize / 2)) {
+                        mouseLocation = 'se-resize';
+                        canvas.style.cursor = 'nwse-resize';
+                } else if (canvasX > self.cropCoords.x - (options.handleSize / 2) &&
+                    canvasX < self.cropCoords.x + (options.handleSize / 2) &&
+                    canvasY > self.cropCoords.y + self.cropCoords.height - (options.handleSize / 2) &&
+                    canvasY < self.cropCoords.y + self.cropCoords.height + (options.handleSize / 2)) {
+                        mouseLocation = 'sw-resize';
+                        canvas.style.cursor = 'nesw-resize';
+                } else if (!options.ratio &&
+                    canvasX > self.cropCoords.x + (self.cropCoords.width / 2) - (options.handleSize / 2) &&
+                    canvasX < self.cropCoords.x + (self.cropCoords.width / 2) + (options.handleSize / 2) &&
+                    canvasY > self.cropCoords.y - (options.handleSize / 2) &&
+                    canvasY < self.cropCoords.y + (options.handleSize / 2)) {
+                        mouseLocation = 'n-resize';
+                        canvas.style.cursor = 'ns-resize';
+                } else if (!options.ratio &&
+                    canvasX > self.cropCoords.x + self.cropCoords.width - (options.handleSize / 2) &&
+                    canvasX < self.cropCoords.x + self.cropCoords.width + (options.handleSize / 2) &&
+                    canvasY > self.cropCoords.y + (self.cropCoords.height / 2) - (options.handleSize / 2) &&
+                    canvasY < self.cropCoords.y + (self.cropCoords.height / 2) + (options.handleSize / 2)) {
+                        mouseLocation = 'e-resize';
+                        canvas.style.cursor = 'ew-resize';
+                } else if (!options.ratio &&
+                    canvasX > self.cropCoords.x + (self.cropCoords.width / 2) - (options.handleSize / 2) &&
+                    canvasX < self.cropCoords.x + (self.cropCoords.width / 2) + (options.handleSize / 2) &&
+                    canvasY > self.cropCoords.y + self.cropCoords.height - (options.handleSize / 2) &&
+                    canvasY < self.cropCoords.y + self.cropCoords.height + (options.handleSize / 2)) {
+                        mouseLocation = 's-resize';
+                        canvas.style.cursor = 'ns-resize';
+                } else if (!options.ratio &&
+                    canvasX > self.cropCoords.x - (options.handleSize / 2) &&
+                    canvasX < self.cropCoords.x + (options.handleSize / 2) &&
+                    canvasY > self.cropCoords.y + (self.cropCoords.height / 2) - (options.handleSize / 2) &&
+                    canvasY < self.cropCoords.y + (self.cropCoords.height / 2) + (options.handleSize / 2)) {
+                        mouseLocation = 'w-resize';
+                        canvas.style.cursor = 'ew-resize';
+                } else if (canvasX > self.cropCoords.x &&
+                    canvasX < self.cropCoords.x + self.cropCoords.width &&
+                    canvasY > self.cropCoords.y &&
+                    canvasY < self.cropCoords.y + self.cropCoords.height) {
+                        mouseLocation = 'selection';
+                        canvas.style.cursor = 'move';
+                } else {
+                    mouseLocation = '';
+                    canvas.style.cursor = 'crosshair';
+                }
+            }
+        }, false);
+
+        // set up event listeners on the canvas
+        canvas.addEventListener('mousedown', function (e) {
+            var canvasX = e.pageX - canvas.offsetLeft,
+                canvasY = e.pageY - canvas.offsetTop;
+
+            // Check to see if we're resizing
+            if (mouseLocation.indexOf('resize') > -1) {
+                dragCoords.x = self.cropCoords.x;
+                dragCoords.y = self.cropCoords.y;
+                dragCoords.height = self.cropCoords.height;
+                dragCoords.width = self.cropCoords.width;
+
+                if (mouseLocation === 'nw-resize') {
+                    dragCoords.x = self.cropCoords.x + self.cropCoords.width;
+                    dragCoords.y = self.cropCoords.y + self.cropCoords.height;
+                    dragCoords.height = self.cropCoords.height * -1;
+                    dragCoords.width = self.cropCoords.width * -1;
+                } else if (mouseLocation === 'ne-resize') {
+                    dragCoords.y = self.cropCoords.y + self.cropCoords.height;
+                    dragCoords.height = self.cropCoords.height * -1;
+                } else if (mouseLocation === 'sw-resize') {
+                    dragCoords.x = self.cropCoords.x + self.cropCoords.width;
+                    dragCoords.width = self.cropCoords.width * -1;
+                } else if (mouseLocation === 'n-resize') {
+                    dragCoords.y = self.cropCoords.y + self.cropCoords.height;
+                    dragCoords.height = self.cropCoords.height * -1;
+                } else if (mouseLocation === 'w-resize') {
+                    dragCoords.x = self.cropCoords.x + self.cropCoords.width;
+                    dragCoords.width = self.cropCoords.width * -1;
+                }
+
+                currentMouseState = 'resizing';
+            } else if (mouseLocation === 'selection') {
+                // set the starting point for our drag
+                dragCoords.x = self.cropCoords.x;
+                dragCoords.y = self.cropCoords.y;
+                dragCoords.mouseX = canvasX - self.cropCoords.x;
+                dragCoords.mouseY = canvasY - self.cropCoords.y;
+
+                currentMouseState = 'dragging';
+            } else {
+                // set initial top and left coordinates
+                self.cropCoords.x = canvasX;
+                self.cropCoords.y = canvasY;
+
+                currentMouseState = 'drawing';
+            }
+        }, false);
+
+        // Handle mouse up / mouse out
+        function endMouseMove () {
+            // Handle dragging from not the top left
+            if (self.cropCoords.width < 0) {
+                self.cropCoords.width = Math.abs(self.cropCoords.width);
+                self.cropCoords.x -= self.cropCoords.width;
+            }
+            if (self.cropCoords.height < 0) {
+                self.cropCoords.height = Math.abs(self.cropCoords.height);
+                self.cropCoords.y -= self.cropCoords.height;
+            }
+            currentMouseState = false;
+        }
+        canvas.addEventListener('mouseup', endMouseMove, false);
+        canvas.addEventListener('mouseout', endMouseMove, false);
     };
 
     /**
@@ -324,7 +543,7 @@
         // if width and height aren't set, save the whole image
         if (Math.abs(this.cropCoords.width) <= options.dragThreshold ||
             Math.abs(this.cropCoords.height) <= options.dragThreshold) {
-            return canvas.toDataURL(options.imageType, options.imageQuality);
+            return this.canvas.base.canvas.toDataURL(options.imageType, options.imageQuality);
         }
 
         // if a ratio is set after init, ratio wins over output width/height
