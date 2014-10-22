@@ -47,7 +47,7 @@
      * @return {object} Options currently available for this instance
      */
     proto.getOptions = function () {
-        return this._options || this._options = this._defaultOptions;
+        return this._options;
     };
 
     /**
@@ -57,6 +57,34 @@
      */
     proto.init = function () {
         //
+    };
+
+    /**
+     * Update the options with the passed parameter(s)
+     * If the options global is not set, set it to the default options
+     * If the first parameter is an object, pass any new parameters to the options global
+     * If the first parameter is a string, and the second parameter exists, update the option using the first parameter as a key
+     *
+     * @param {object|string} Object of options, or string of an option key
+     * @param {mixed} Value to set if the first parameter is a string
+     */
+    proto.set = function (prop, value) {
+        var objProp;
+
+        // Set the options to the defaults if they aren't currently set
+        if (!this._options) {
+            this._options = this._defaultOptions;
+        }
+
+        // if an object is passed as the first parameter, loop through it
+        if (typeof prop === 'object') {
+            for (objProp in prop) {
+                this.set(objProp, prop[objProp]);
+            }
+        } else {
+            // otherwise assume we were given a property and update it
+            this._options[prop] = value;
+        }
     };
 
     /**
