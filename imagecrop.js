@@ -20,8 +20,6 @@
 
     // Shortcuts
     var proto = ImageCrop.prototype;
-    var exports = this;
-    var originalGlobalValue = exports.ImageCrop;
 
     /**
      * Default options for every ImageCrop instance
@@ -570,5 +568,5 @@
     };
 
     // Expose the class via the global object
-    exports.ImageCrop = ImageCrop;
+    this.ImageCrop = ImageCrop;
 }.call(this));
