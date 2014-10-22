@@ -248,11 +248,20 @@
 
                     self.cropCoords.x += horizontal;
                     self.cropCoords.y += vertical;
-                    self.draw('selection');
-
-                    e.preventDefault();
-                    e.stopPropagation();
                 }
+
+                // Clear the selection when hitting the Esc key
+                else if (e.keyCode === 27) {
+                    self.cropCoords.x = 0;
+                    self.cropCoords.y = 0;
+                    self.cropCoords.width = 0;
+                    self.cropCoords.height = 0;
+                }
+
+                self.draw('selection');
+
+                e.preventDefault();
+                e.stopPropagation();
             }, false);
         }
 
@@ -539,8 +548,7 @@
         var options = this.getOptions();
 
         // if width and height aren't set, save the whole image
-        if (Math.abs(this.cropCoords.width) <= options.dragThreshold ||
-            Math.abs(this.cropCoords.height) <= options.dragThreshold) {
+        if (Math.min(Math.abs(this.cropCoords.height), Math.abs(this.cropCoords.width)) <= options.dragThreshold) {
             return this.canvas.base.canvas.toDataURL(options.imageType, options.imageQuality);
         }
 
