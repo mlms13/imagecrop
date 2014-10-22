@@ -14,6 +14,8 @@
     function ImageCrop (options) {
         this.set(options);
         this.init();
+        this.initSelection();
+        this.initEvents();
     }
 
     // Shortcuts
@@ -65,8 +67,8 @@
         // Set up and position the base layer canvas
         var baseCanvas = this.createLayer('base');
 
-        baseCanvas.draw = function (layer, image) {
-            // clear everything on the canvas
+        baseCanvas.draw = function (layer) {
+            // Clear everything on the canvas
             layer.ctx.clearRect(0, 0, layer.ctx.canvas.width, layer.ctx.canvas.height);
 
             // Draw the image on the canvas
@@ -82,6 +84,120 @@
 
         // Hide the original image
         this.image.style.visibility = 'hidden';
+    };
+
+    /**
+     * Create a canvas to signify the selection
+     * Handle collisions and ratios
+     */
+    proto.initSelection = function () {
+        var options = this.getOptions(),
+            self = this;
+
+        this.cropCoords = {
+            x: 0,
+            y: 0,
+            height: 0,
+            width: 0
+        };
+
+        // Set up and position the selection layer canvas
+        var selectionCanvas = this.createLayer('selection');
+
+        // If the selection is larger than the threshold, draw the selection
+        if (Math.min(this.cropCoords.height, this.cropCoords.width) > options.dragThreshold) {
+
+            // Fix a ratio if required
+            if (options.ratio) {
+                var absWidth = Math.abs(this.cropCoords.width),
+                    absHeight = Math.abs(this.cropCoords.height),
+                    minSideLength = Math.min(absWidth / options.ratio, absHeight);
+
+                this.cropCoords.width = this.cropCoords.width < 0 ?
+                                        -1 * minSideLength * options.ratio :
+                                        minSideLength * options.ratio;
+
+                this.cropCoords.height = this.cropCoords.height < 0 ?
+                                        -1 * minSideLength :
+                                        minSideLength;
+            }
+
+            // Collision detection
+            if (this.cropCoords.x < 0) { this.cropCoords.x = 0; }
+            if (this.cropCoords.y < 0) { this.cropCoords.y = 0; }
+            if (this.cropCoords.x + this.cropCoords.width > selectionCanvas.ctx.canvas.width) {
+                this.cropCoords.x = selectionCanvas.ctx.canvas.width - this.cropCoords.width;
+            }
+            if (this.cropCoords.y + this.cropCoords.height > selectionCanvas.ctx.canvas.height) {
+                this.cropCoords.y = selectionCanvas.ctx.canvas.height - this.cropCoords.height;
+            }
+
+            selectionCanvas.draw = function (layer) {
+                // Clear everything on the canvas
+                layer.ctx.clearRect(0, 0, layer.ctx.canvas.width, layer.ctx.canvas.height);
+
+                // Draw a dark backdrop
+                layer.ctx.fillStyle = options.activeFill;
+                layer.ctx.fillRect(0, 0, layer.ctx.canvas.width, layer.ctx.canvas.height);
+
+                // Draw the image on the canvas
+                layer.ctx.drawImage(
+                    self.image, self.cropCoords.x, self.cropCoords.y,
+                    self.cropCoords.width, self.cropCoords.height,
+                    self.cropCoords.x, self.cropCoords.y,
+                    self.cropCoords.width, self.cropCoords.height
+                );
+
+                // Draw corner resize handles
+                layer.ctx.fillStyle = options.handleFill;
+                layer.ctx.fillRect(self.cropCoords.x - (options.handleSize / 2),
+                                   self.cropCoords.y - (options.handleSize / 2),
+                                   options.handleSize, options.handleSize);
+                layer.ctx.fillRect(self.cropCoords.x + self.cropCoords.width - (options.handleSize / 2),
+                                   self.cropCoords.y - (options.handleSize / 2),
+                                   options.handleSize, options.handleSize);
+                layer.ctx.fillRect(self.cropCoords.x - (options.handleSize / 2),
+                                   self.cropCoords.y + self.cropCoords.height - (options.handleSize / 2),
+                                   options.handleSize, options.handleSize);
+                layer.ctx.fillRect(self.cropCoords.x + self.cropCoords.width - (options.handleSize / 2),
+                                   self.cropCoords.y + self.cropCoords.height - (options.handleSize / 2),
+                                   options.handleSize, options.handleSize);
+
+                // Draw side resize handles if we're not fixing a ratio
+                if (!options.ratio) {
+                    layer.ctx.fillRect(self.cropCoords.x + (self.cropCoords.width / 2) - (options.handleSize / 2),
+                                       self.cropCoords.y - (options.handleSize / 2),
+                                       options.handleSize, options.handleSize);
+                    layer.ctx.fillRect(self.cropCoords.x + self.cropCoords.width - (options.handleSize / 2),
+                                       self.cropCoords.y + (self.cropCoords.height / 2) - (options.handleSize / 2),
+                                       options.handleSize, options.handleSize);
+                    layer.ctx.fillRect(self.cropCoords.x + (self.cropCoords.width / 2) - (options.handleSize / 2),
+                                       self.cropCoords.y + self.cropCoords.height - (options.handleSize / 2),
+                                       options.handleSize, options.handleSize);
+                    layer.ctx.fillRect(self.cropCoords.x - (options.handleSize / 2),
+                                       self.cropCoords.y + (self.cropCoords.height / 2) - (options.handleSize / 2),
+                                       options.handleSize, options.handleSize);
+                }
+
+            };
+        }
+
+        // If the selection is too small, clear the selection
+        else {
+            selectionCanvas.draw = function (layer) {
+                layer.ctx.clearRect(0, 0, layer.ctx.canvas.width, layer.ctx.canvas.height);
+            };
+        }
+
+        // Finally draw the selection layer
+        this.draw('selection');
+    };
+
+    /**
+     * Initialize mouse and keyboard events
+     */
+    proto.initEvents = function () {
+        //
     };
 
     /**
@@ -113,12 +229,14 @@
         }
 
         // Set the canvas up for the named layer
-        else if (layer) {
+        else {
             // Create the canvas element
             this.canvas[layer].canvas = document.createElement('canvas');
             this.canvas[layer].ctx = this.canvas[layer].canvas.getContext('2d');
 
             // Set the canvas to sit in place of the original image
+            this.canvas[layer].canvas.id             = 'imagecrop-' + layer;
+            this.canvas[layer].canvas.className      = 'imagecrop';
             this.canvas[layer].canvas.width          = this.image.offsetWidth;
             this.canvas[layer].canvas.height         = this.image.offsetHeight;
             this.canvas[layer].canvas.style.position = 'absolute';
@@ -211,8 +329,7 @@
 
         // if a ratio is set after init, ratio wins over output width/height
         if (options.outputWidth / options.outputHeight !== options.ratio) {
-            options.outputWidth = false;
-            options.outputHeight = false;
+            options.outputWidth = options.outputHeight = false;
         }
 
         // create a new canvas, real quick like
@@ -226,8 +343,8 @@
         tmpCanvas.height = tmpHeight;
 
         // draw
-        tmpCtx.drawImage(options.image, self.cropCoords.x, self.cropCoords.y,
-                         self.cropCoords.width, self.cropCoords.height, 0, 0,
+        tmpCtx.drawImage(this.image, this.cropCoords.x, this.cropCoords.y,
+                         this.cropCoords.width, this.cropCoords.height, 0, 0,
                          tmpWidth, tmpHeight);
 
         return tmpCanvas.toDataURL(options.imageType, options.imageQuality);
