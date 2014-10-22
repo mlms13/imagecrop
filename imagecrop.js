@@ -74,13 +74,17 @@
 
         // If layer is an array, then loop through and create all layers
         if (layer instanceof Array) {
+            var layers = {};
+
             for (var i = 0; i < layer.length; i++) {
-                this.createLayer(layer[i]);
+                layers[layer] = this.createLayer(layer[i]);
             }
+
+            return layers;
         }
 
         // Set the canvas up for the named layer
-        else {
+        else if (!layer) {
             // Create the canvas element
             this.canvas[layer].canvas = document.createElement('canvas');
             this.canvas[layer].ctx = this.canvas[layer].canvas.getContext('2d');
@@ -100,6 +104,8 @@
 
             // Hide the original image
             this.image.style.visibility = 'hidden';
+
+            return this.canvas[layer];
         }
     }
 
@@ -118,6 +124,11 @@
         }
 
         // Draw the canvas for the named layer
+        else if (!layer) {
+            //
+        }
+
+        // If no layer is specified, draw all layers
         else {
             //
         }
