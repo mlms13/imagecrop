@@ -248,6 +248,9 @@
 
                     self.cropCoords.x += horizontal;
                     self.cropCoords.y += vertical;
+
+                    e.preventDefault();
+                    e.stopPropagation();
                 }
 
                 // Clear the selection when hitting the Esc key
@@ -256,12 +259,12 @@
                     self.cropCoords.y = 0;
                     self.cropCoords.width = 0;
                     self.cropCoords.height = 0;
+
+                    e.preventDefault();
+                    e.stopPropagation();
                 }
 
                 self.draw('selection');
-
-                e.preventDefault();
-                e.stopPropagation();
             }, false);
         }
 
