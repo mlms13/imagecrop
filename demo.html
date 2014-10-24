@@ -10,9 +10,9 @@
         <button id="button" role="button">Button</button>
         <script src="imagecrop.js"></script>
         <script>
-            var createImageCrop = function (image) {
+            var createImageCrop = function () {
                 var cropped = new ImageCrop({
-                    image: image,
+                    selector: '.crop-me',
                     imageType: 'image/jpeg',
                     outputWidth: 1920,
                     outputHeight: 1080
@@ -29,10 +29,10 @@
             var image = document.querySelector('.crop-me');
 
             if (image.complete) {
-                createImageCrop(image);
+                createImageCrop();
             } else {
                 image.addEventListener('load', function () {
-                    createImageCrop(image);
+                    createImageCrop();
                 });
             }
         </script>

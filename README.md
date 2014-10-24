@@ -33,27 +33,31 @@ Somewhere near the end of your document, include the `imagecrop.js` script and i
 
 ### Methods and Public Properties
 
-| Method or Property | Result                                                       |
-|--------------------|--------------------------------------------------------------|
-| `save()`           | Returns a PNG image representing the current crop selection. |
-| `set(prop, val)`   | Update options after `init` by passing a property and value, or object containing multiple.|
-| `cropCoords`       | An object with `x`, `y`, `width`, and `height` properties related to the current crop selection.|
-| `drawSelection()`  | Redraw the Canvas after you've changed `cropCoords`.         |
+| Method or Property | Result                                                                                           |
+|--------------------|--------------------------------------------------------------------------------------------------|
+| `save()`           | Returns a PNG image representing the current crop selection.                                     |
+| `set(prop, val)`   | Update options after `init` by passing a property and value, or object containing multiple.      |
+| `cropCoords`       | An object with `x`, `y`, `width`, and `height` properties related to the current crop selection. |
+| `draw(layer)`      | Redraw the canvas layer after you've changed `cropCoords`.                                       |
 
 ## Options
 
-| Option         | Type    | Default                   | Comment                                         |
-|----------------|---------|---------------------------|-------------------------------------------------|
-| `selector`     | string  | `"img.imagecrop"`         | Pass in a selector for your image.              |
-| `image`        | element | `querySelector(selector)` | If you already have a reference to your image, you can pass that instead of a selector. |
-| `opacity`      | number  | `0.4`                     | Opacity for the canvas overlay during cropping. |
-| `outputWidth`  | number  | `false`                   | A target width for the cropped file.            |
-| `outputHeight` | number  | `false`                   | A target height for the cropped file.           |
-| `ratio`        | number  | `false`*                  | A fixed ratio representing `width` / `height`.  |
-| `handleSize`   | number  | `10`                      | Size in pixels of the square resize handles.    |
-| `handleFill`   | string  | `"rgba(0, 0, 0, 0.65)"`   | Fill color of resize handles.                   |
-| `keyboard`     | boolean | `true`                    | Allow keyboard interaction with the Canvas      |
-| `keyboardStep` | number  | `5`                       | Number of pixels the keyboard keys should move the selection. |
+| Option         | Type    | Default                   | Comment                                                          |
+|----------------|---------|---------------------------|------------------------------------------------------------------|
+| `selector`     | string  | `"img.imagecrop"`         | Pass in a selector for your image.                               |
+| `initialFill`  | string  | `"rgba(0, 0, 0, 0.1)"`    | Color value to overlay on the base canvas.                       |
+| `activeFill`   | string  | `"rgba(0, 0, 0, 0.6)"`    | Color value of the background once a selection is drawn.         |
+| `outputWidth`  | number  | `false`                   | A target width for the cropped file.                             |
+| `outputHeight` | number  | `false`                   | A target height for the cropped file.                            |
+| `ratio`        | number  | `false`*                  | A fixed ratio representing `width` / `height`.                   |
+| `handleSize`   | number  | `10`                      | Size in pixels of the square resize handles.                     |
+| `handleFill`   | string  | `"rgba(0, 0, 0, 0.65)"`   | Fill color of resize handles.                                    |
+| `keyboard`     | boolean | `true`                    | Allow keyboard interaction with the Canvas                       |
+| `keyboardStep` | number  | `5`                       | Number of pixels the keyboard keys should move the selection.    |
+| `imageType`    | string  | `'image/png'`             | MIME-Type of the output image when you use the `.save()` method. |
+| `imageQuality` | number  | `1.0`                     | Quality of the image from `0.0` - `1.0`.                         |
+| `dragThreshold`| number  | `1`                       | Size in pixels the selection needs to be in order to show up.    |
+
 
 * If an `outputWidth` and `outputHeight` are set, ratio will be set automatically, regardless of whether a `ratio` is passed to the constructor. Height and width win, but if a ratio is set later using the `.set()` method, height and width will be ignored when the image is saved (to avoid skewed images).
 
