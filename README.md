@@ -44,7 +44,7 @@ Somewhere near the end of your document, include the `imagecrop.js` script and i
 
 | Option         | Type    | Default                   | Comment                                                          |
 |----------------|---------|---------------------------|------------------------------------------------------------------|
-| `selector`     | string  | `"img.imagecrop"`         | Pass in a selector for your image.                               |
+| `image`        | element | `document.querySelector("img.imagecrop")` | Pass in an element for your image.               |
 | `initialFill`  | string  | `"rgba(0, 0, 0, 0.1)"`    | Color value to overlay on the base canvas.                       |
 | `activeFill`   | string  | `"rgba(0, 0, 0, 0.6)"`    | Color value of the background once a selection is drawn.         |
 | `outputWidth`  | number  | `false`                   | A target width for the cropped file.                             |
