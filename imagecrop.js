@@ -25,7 +25,7 @@
      * Default options for every ImageCrop instance
      */
     proto._defaultOptions = {
-        selector:      'img.imagecrop',
+        image:         document.querySelector('img.imagecrop'),
         initialFill:   'rgba(0, 0, 0, 0.1)',
         activeFill:    'rgba(0, 0, 0, 0.6)',
         outputWidth:   false,
@@ -70,7 +70,7 @@
             self = this;
 
         // Set the image variable globally
-        this.image = document.querySelector(options.selector);
+        this.image = options.image;
 
         // Set up and position the base layer canvas
         var baseCanvas = this.createLayer('base');
