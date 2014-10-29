@@ -112,34 +112,37 @@
             selectionCanvas.canvas.style.outline = 'none';
         }
 
-        selectionCanvas.draw = function (layer) {
+        selectionCanvas.draw = function (layer, drawParameters) {
+            var ratio = options.ratio || drawParameters.ratio;
 
             // If the selection is larger than the threshold, draw the selection
-            if (Math.min(Math.abs(self.cropCoords.height), Math.abs(self.cropCoords.width)) > options.dragThreshold) {
-
-                // Fix a ratio if required
-                if (options.ratio) {
-                    var absWidth = Math.abs(self.cropCoords.width),
-                        absHeight = Math.abs(self.cropCoords.height),
-                        minSideLength = Math.min(absWidth / options.ratio, absHeight);
-
-                    self.cropCoords.width = self.cropCoords.width < 0 ?
-                                            -1 * minSideLength * options.ratio :
-                                            minSideLength * options.ratio;
-
-                    self.cropCoords.height = self.cropCoords.height < 0 ?
-                                            -1 * minSideLength :
-                                            minSideLength;
-                }
+            if (Math.min(Math.abs(self.cropCoords.width), Math.abs(self.cropCoords.height)) > options.dragThreshold) {
 
                 // Collision detection
                 if (self.cropCoords.x < 0) { self.cropCoords.x = 0; }
                 if (self.cropCoords.y < 0) { self.cropCoords.y = 0; }
-                if (self.cropCoords.x + self.cropCoords.width > selectionCanvas.ctx.canvas.width) {
-                    self.cropCoords.x = selectionCanvas.ctx.canvas.width - self.cropCoords.width;
+                if (self.cropCoords.width > layer.ctx.canvas.width) { self.cropCoords.width = layer.ctx.canvas.width; }
+                if (self.cropCoords.height > layer.ctx.canvas.height) { self.cropCoords.height = layer.ctx.canvas.height; }
+                if (self.cropCoords.x + self.cropCoords.width > layer.ctx.canvas.width) {
+                    self.cropCoords.x = layer.ctx.canvas.width - self.cropCoords.width;
                 }
-                if (self.cropCoords.y + self.cropCoords.height > selectionCanvas.ctx.canvas.height) {
-                    self.cropCoords.y = selectionCanvas.ctx.canvas.height - self.cropCoords.height;
+                if (self.cropCoords.y + self.cropCoords.height > layer.ctx.canvas.height) {
+                    self.cropCoords.y = layer.ctx.canvas.height - self.cropCoords.height;
+                }
+
+                // Fix a ratio if required
+                if (ratio) {
+                    var absWidth = Math.abs(self.cropCoords.width),
+                        absHeight = Math.abs(self.cropCoords.height),
+                        minSideLength = Math.min(absWidth / ratio, absHeight);
+
+                    self.cropCoords.width = self.cropCoords.width < 0 ?
+                                            -1 * minSideLength * ratio :
+                                            minSideLength * ratio;
+
+                    self.cropCoords.height = self.cropCoords.height < 0 ?
+                                            -1 * minSideLength :
+                                            minSideLength;
                 }
 
                 // Clear everything on the canvas
@@ -207,7 +210,8 @@
             self = this,
             canvas = this.canvas.selection.canvas,
             dragCoords = {},
-            currentMouseState, mouseLocation, resizeRatio;
+            drawParameters = {},
+            currentMouseState, mouseLocation;
 
         // Allow changing selection position with keyboard
         if (options.keyboard) {
@@ -291,20 +295,20 @@
                     if (e.shiftKey) {
 
                         // Set the ratio if one isn't set
-                        if (!resizeRatio) {
-                            resizeRatio = Math.abs((canvasX - self.cropCoords.x) / (canvasY - self.cropCoords.y));
+                        if (!drawParameters.ratio) {
+                            drawParameters.ratio = Math.abs((canvasX - self.cropCoords.x) / (canvasY - self.cropCoords.y));
                         }
 
                         var direction = (canvasX - self.cropCoords.x < 0) ? -1 : 1;
 
-                        self.cropCoords.width = Math.abs(canvasY - self.cropCoords.y) * resizeRatio * direction;
+                        self.cropCoords.width = Math.abs(canvasY - self.cropCoords.y) * drawParameters.ratio * direction;
                         self.cropCoords.height = canvasY - self.cropCoords.y;
                     } else {
                         self.cropCoords.width = canvasX - self.cropCoords.x;
                         self.cropCoords.height = canvasY - self.cropCoords.y;
 
                         // Reset the ratio
-                        resizeRatio = false;
+                        drawParameters.ratio = false;
                     }
                 }
             } else if (currentMouseState === 'drawing') {
@@ -317,7 +321,7 @@
 
             if (currentMouseState) {
                 // draw the selection box
-                self.draw('selection');
+                self.draw('selection', drawParameters);
             } else {
                 // determine where the mouse is in the canvas selection
                 if (canvasX > self.cropCoords.x - (options.handleSize / 2) &&
