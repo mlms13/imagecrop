@@ -8,8 +8,8 @@
     /**
      * Class for cropping images using canvas
      *
-     * @class ImageCrop Manages image cropping and saving
-     * @param {object} Options for this instance
+     * @class ImageCrop - Manages image cropping and saving
+     * @param {object} options - Options for this instance
      */
     function ImageCrop (options) {
         if (!(this instanceof ImageCrop)) { return new ImageCrop(options); }
@@ -55,7 +55,7 @@
      * Return the object containing options
      * If one doesn't exist, set them to the default
      *
-     * @return {object} Options currently available for this instance
+     * @return {object} - Options currently available for this instance
      */
     proto.getOptions = function () {
         return this._options;
@@ -454,7 +454,8 @@
     /**
      * Create the canvas elements and assign them to globals
      *
-     * @param {string|array} Layer name as a string, or an array of layers
+     * @param {string|array} layer - Layer name as a string, or an array of layers
+     * @return {{}|array{}} - Object containing the canvas and the context or array of objects
      */
     proto.createLayer = function (layer) {
 
@@ -507,7 +508,7 @@
     /**
      * Draw the canvases, if a layer is specified, only draw that layer
      *
-     * @param {string|array} Layer name as a string, or an array of layers
+     * @param {string|string[]} layer - Layer name as a string, or an array of layers
      */
     proto.draw = function (layer) {
 
@@ -529,7 +530,6 @@
         else {
             this.canvas[layer].draw(this.canvas[layer]);
         }
-
     };
 
     /**
@@ -538,8 +538,8 @@
      * If the first parameter is an object, pass any new parameters to the options global
      * If the first parameter is a string, and the second parameter exists, update the option using the first parameter as a key
      *
-     * @param {object|string} Object of options, or string of an option key
-     * @param {mixed} Value to set if the first parameter is a string
+     * @param {object|string} prop - Object of options, or string of an option key
+     * @param {mixed} value - Value to set if the first parameter is a string
      */
     proto.set = function (prop, value) {
         var objProp;
@@ -567,7 +567,7 @@
      * If there isn't a selection, save the entire image
      * Ensure that if the output width/height does not coincide with the ratio, that the ratio wins out
      *
-     * @return {string} DataURL of the image in the selection
+     * @return {string} - DataURL of the image in the selection
      */
     proto.save = function () {
         var options = this.getOptions();
