@@ -509,26 +509,28 @@
      * Draw the canvases, if a layer is specified, only draw that layer
      *
      * @param {string|string[]} layer - Layer name as a string, or an array of layers
+     * @param {object} [drawParameters] - Parameters used for drawing
      */
-    proto.draw = function (layer) {
+    proto.draw = function (layer, drawParameters) {
+        drawParameters = drawParameters || {};
 
         // If layer is an array, then loop through and draw all layers
         if (layer instanceof Array) {
             for (var i = 0; i < layer.length; i++) {
-                this.draw(layer[i]);
+                this.draw(layer[i], drawParameters);
             }
         }
 
         // If no layer is specified, draw all layers
         else if (!layer) {
             for (layer in this.canvas) {
-                this.draw(layer);
+                this.draw(layer, drawParameters);
             }
         }
 
         // Draw the canvas for the named layer
         else {
-            this.canvas[layer].draw(this.canvas[layer]);
+            this.canvas[layer].draw(this.canvas[layer], drawParameters);
         }
     };
 
