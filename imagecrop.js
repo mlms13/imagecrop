@@ -12,6 +12,7 @@
      * @param {object} Options for this instance
      */
     function ImageCrop (options) {
+        if (!(this instanceof ImageCrop)) { return new ImageCrop(options); }
         this.set(options);
         this.init();
         this.initSelection();
