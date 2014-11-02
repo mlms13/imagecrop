@@ -4,6 +4,7 @@
  * MIT License
  */
 (function () {
+    'use strict';
 
     /**
      * Class for cropping images using canvas
@@ -13,6 +14,7 @@
      */
     function ImageCrop (options) {
         if (!(this instanceof ImageCrop)) { return new ImageCrop(options); }
+
         this.set(options);
         this.init();
         this.initSelection();
@@ -516,7 +518,7 @@
             this.canvas[layer].canvas.style.left     = this.image.offsetLeft + 'px';
 
             // Function that the draw method will call, make sure to override
-            this.canvas[layer].draw = function (layer) {};
+            this.canvas[layer].draw = function (layer, drawParameters) {};
 
             // Add the canvas to the body
             document.body.appendChild(this.canvas[layer].canvas);
@@ -528,7 +530,7 @@
     /**
      * Draw the canvases, if a layer is specified, only draw that layer
      *
-     * @param {string|string[]} layer - Layer name as a string, or an array of layers
+     * @param {string|string[]} [layer] - Layer name as a string, or an array of layers
      * @param {object} [drawParameters] - Parameters used for drawing
      */
     proto.draw = function (layer, drawParameters) {
@@ -615,9 +617,11 @@
         tmpCanvas.height = tmpHeight;
 
         // draw
-        tmpCtx.drawImage(this.image, this.cropCoords.x, this.cropCoords.y,
-                         this.cropCoords.width, this.cropCoords.height, 0, 0,
-                         tmpWidth, tmpHeight);
+        tmpCtx.drawImage(
+            this.image, this.cropCoords.x, this.cropCoords.y,
+            this.cropCoords.width, this.cropCoords.height,
+            0, 0, tmpWidth, tmpHeight
+        );
 
         return tmpCanvas.toDataURL(options.imageType, options.imageQuality);
     };
