@@ -130,8 +130,8 @@
                 if (self.cropCoords.width < 0 && self.cropCoords.width * -1 > self.cropCoords.x) {
                     self.cropCoords.width = self.cropCoords.x * -1;
                 }
-                if (self.cropCoords.height < 0 && self.cropCoords.height * -1 > self.cropCoords.x) {
-                    self.cropCoords.height = self.cropCoords.x * -1;
+                if (self.cropCoords.height < 0 && self.cropCoords.height * -1 > self.cropCoords.y) {
+                    self.cropCoords.height = self.cropCoords.y * -1;
                 }
                 if (self.cropCoords.x + self.cropCoords.width > layer.ctx.canvas.width) {
                     self.cropCoords.x = layer.ctx.canvas.width - self.cropCoords.width;
