@@ -121,8 +121,18 @@
                 // Collision detection
                 if (self.cropCoords.x < 0) { self.cropCoords.x = 0; }
                 if (self.cropCoords.y < 0) { self.cropCoords.y = 0; }
-                if (self.cropCoords.width > layer.ctx.canvas.width) { self.cropCoords.width = layer.ctx.canvas.width; }
-                if (self.cropCoords.height > layer.ctx.canvas.height) { self.cropCoords.height = layer.ctx.canvas.height; }
+                if (Math.abs(self.cropCoords.width) > layer.ctx.canvas.width) {
+                    self.cropCoords.width = layer.ctx.canvas.width * (self.cropCoords.width < 0 ? -1 : 1);
+                }
+                if (Math.abs(self.cropCoords.height) > layer.ctx.canvas.height) {
+                    self.cropCoords.height = layer.ctx.canvas.height * (self.cropCoords.height < 0 ? -1 : 1);
+                }
+                if (self.cropCoords.width < 0 && self.cropCoords.width * -1 > self.cropCoords.x) {
+                    self.cropCoords.width = self.cropCoords.x * -1;
+                }
+                if (self.cropCoords.height < 0 && self.cropCoords.height * -1 > self.cropCoords.x) {
+                    self.cropCoords.height = self.cropCoords.x * -1;
+                }
                 if (self.cropCoords.x + self.cropCoords.width > layer.ctx.canvas.width) {
                     self.cropCoords.x = layer.ctx.canvas.width - self.cropCoords.width;
                 }
@@ -287,8 +297,14 @@
 
                 if (mouseLocation === 'n-resize' || mouseLocation === 's-resize') {
                     self.cropCoords.height = canvasY - self.cropCoords.y;
+
+                    // Reset the ratio
+                    drawParameters.ratio = false;
                 } else if (mouseLocation === 'w-resize' || mouseLocation === 'e-resize') {
                     self.cropCoords.width = canvasX - self.cropCoords.x;
+
+                    // Reset the ratio
+                    drawParameters.ratio = false;
                 } else {
 
                     // If shift is held, keep a ratio
