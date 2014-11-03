@@ -143,6 +143,8 @@
                 }
 
                 // Fix a ratio if required
+                ratio = ratio ? ratio : options.outputWidth / options.outputHeight;
+
                 if (ratio) {
                     var absWidth = Math.abs(self.cropCoords.width),
                         absHeight = Math.abs(self.cropCoords.height),
@@ -188,7 +190,7 @@
                                    options.handleSize, options.handleSize);
 
                 // Draw side resize handles if we're not fixing a ratio
-                if (!options.ratio) {
+                if (!ratio) {
                     layer.ctx.fillRect(self.cropCoords.x + (self.cropCoords.width / 2) - (options.handleSize / 2),
                                        self.cropCoords.y - (options.handleSize / 2),
                                        options.handleSize, options.handleSize);
@@ -229,7 +231,8 @@
         if (options.keyboard) {
             canvas.addEventListener('keydown', function (e) {
                 var stepValue = options.keyboardStep,
-                    horizontal = vertical = 0;
+                    horizontal = 0,
+                    vertical = 0;
 
                 if (e.keyCode >= 37 && e.keyCode <= 40) {
 
@@ -587,7 +590,7 @@
         }
 
         // if a ratio is set after init, ratio wins over output width/height
-        if (options.outputWidth / options.outputHeight !== options.ratio) {
+        if (options.ratio && options.outputWidth / options.outputHeight !== options.ratio) {
             options.outputWidth = options.outputHeight = false;
         }
 
