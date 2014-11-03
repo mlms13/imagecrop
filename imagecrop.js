@@ -75,6 +75,9 @@
         // Set the image variable globally
         this.image = options.image;
 
+        // Set the ratio to the output width/height if it's set
+        options.ratio = options.ratio ? options.ratio : options.outputWidth / options.outputHeight;
+
         // Set up and position the base layer canvas
         var baseCanvas = this.createLayer('base');
 
@@ -141,9 +144,6 @@
                 if (self.cropCoords.y + self.cropCoords.height > layer.ctx.canvas.height) {
                     self.cropCoords.y = layer.ctx.canvas.height - self.cropCoords.height;
                 }
-
-                // Fix a ratio if required
-                ratio = ratio ? ratio : options.outputWidth / options.outputHeight;
 
                 if (ratio) {
                     var absWidth = Math.abs(self.cropCoords.width),
@@ -308,11 +308,6 @@
                     if (!drawParameters.ratio) {
                         drawParameters.ratio = Math.abs((canvasX - self.cropCoords.x) / (canvasY - self.cropCoords.y));
                     }
-
-                    var direction = (canvasX - self.cropCoords.x < 0) ? -1 : 1;
-
-                    self.cropCoords.width = Math.abs(canvasY - self.cropCoords.y) * drawParameters.ratio * direction;
-                    self.cropCoords.height = canvasY - self.cropCoords.y;
                 } else {
                     // Reset the ratio
                     drawParameters.ratio = false;
