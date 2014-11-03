@@ -79,7 +79,7 @@
         options.ratio = options.ratio ? options.ratio : options.outputWidth / options.outputHeight;
 
         // Set up and position the base layer canvas
-        var baseCanvas = this.createLayer('base');
+        var baseCanvas = this.createLayer({ name: 'base' });
 
         baseCanvas.draw = function (layer) {
             // Clear everything on the canvas
@@ -109,7 +109,7 @@
             self = this;
 
         // Set up and position the selection layer canvas
-        var selectionCanvas = this.createLayer('selection');
+        var selectionCanvas = this.createLayer({ name:'selection' });
 
         // If we're allowing keyboard controls, the canvas needs to be targetable
         if (options.keyboard) {
@@ -454,10 +454,11 @@
     /**
      * Create the canvas elements and assign them to globals
      *
-     * @param {(string|string[])} layer - Layer name as a string, or an array of strings
-     * @return {object|object[]}        - Object containing the canvas and the context or array of objects
+     * @param {(object|object[])} layer         - Layer name as a string, or an array of strings
+     * @param {boolean}           [append=true] - Whether to append the layer to the document
+     * @return {object|object[]}                - Object containing the canvas and the context or array of objects
      */
-    proto.createLayer = function (layer) {
+    proto.createLayer = function (layer, append) {
 
         // Set the canvas object if it isn't set
         if (!this.canvas) {
@@ -465,8 +466,13 @@
         }
 
         // Set the layer object if it isn't set
-        if (!this.canvas[layer]) {
-            this.canvas[layer] = {};
+        if (!this.canvas[layer.name]) {
+            this.canvas[layer.name] = {};
+        }
+
+        // Set the default value for append
+        if (typeof append === 'undefined') {
+            append = true;
         }
 
         // If layer is an array, then loop through and create all layers
@@ -483,25 +489,27 @@
         // Set the canvas up for the named layer
         else {
             // Create the canvas element
-            this.canvas[layer].canvas = document.createElement('canvas');
-            this.canvas[layer].ctx = this.canvas[layer].canvas.getContext('2d');
+            this.canvas[layer.name].canvas = document.createElement('canvas');
+            this.canvas[layer.name].ctx    = this.canvas[layer.name].canvas.getContext('2d');
 
             // Set the canvas to sit in place of the original image
-            this.canvas[layer].canvas.id             = 'imagecrop-' + layer;
-            this.canvas[layer].canvas.className      = 'imagecrop';
-            this.canvas[layer].canvas.width          = this.image.offsetWidth;
-            this.canvas[layer].canvas.height         = this.image.offsetHeight;
-            this.canvas[layer].canvas.style.position = 'absolute';
-            this.canvas[layer].canvas.style.top      = this.image.offsetTop + 'px';
-            this.canvas[layer].canvas.style.left     = this.image.offsetLeft + 'px';
+            this.canvas[layer.name].canvas.id             = 'imagecrop-' + layer.name;
+            this.canvas[layer.name].canvas.className      = 'imagecrop';
+            this.canvas[layer.name].canvas.width          = layer.width || this.image.offsetWidth;
+            this.canvas[layer.name].canvas.height         = layer.height || this.image.offsetHeight;
+            this.canvas[layer.name].canvas.style.position = 'absolute';
+            this.canvas[layer.name].canvas.style.top      = layer.top || this.image.offsetTop + 'px';
+            this.canvas[layer.name].canvas.style.left     = layer.left || this.image.offsetLeft + 'px';
 
             // Function that the draw method will call, make sure to override
-            this.canvas[layer].draw = function (layer, drawParameters) {};
+            this.canvas[layer.name].draw = function (layer, drawParameters) {};
 
             // Add the canvas to the body
-            document.body.appendChild(this.canvas[layer].canvas);
+            if (append) {
+                document.body.appendChild(this.canvas[layer.name].canvas);
+            }
 
-            return this.canvas[layer];
+            return this.canvas[layer.name];
         }
     };
 
@@ -579,29 +587,26 @@
             return this.canvas.base.canvas.toDataURL(options.imageType, options.imageQuality);
         }
 
-        // if a ratio is set after init, ratio wins over output width/height
+        // If a ratio is set after init, ratio wins over output width/height
         if (options.ratio && options.outputWidth / options.outputHeight !== options.ratio) {
             options.outputWidth = options.outputHeight = false;
         }
 
-        // create a new canvas, real quick like
-        var tmpCanvas = document.createElement('canvas'),
-            tmpCtx = tmpCanvas.getContext('2d'),
-            tmpWidth = options.outputWidth || this.cropCoords.width,
-            tmpHeight = options.outputHeight || this.cropCoords.height;
+        // Create a new temporary canvas, real quick like
+        var tmpCanvas = this.createLayer({
+            name: 'temp',
+            width: options.outputWidth || this.cropCoords.width,
+            height: options.outputHeight || this.cropCoords.height,
+        }, false);
 
-        // size the new canvas correctly
-        tmpCanvas.width = tmpWidth;
-        tmpCanvas.height = tmpHeight;
-
-        // draw
-        tmpCtx.drawImage(
+        // Draw the image
+        tmpCanvas.ctx.drawImage(
             this.image, this.cropCoords.x, this.cropCoords.y,
             this.cropCoords.width, this.cropCoords.height,
-            0, 0, tmpWidth, tmpHeight
+            0, 0, tmpCanvas.ctx.canvas.width, tmpCanvas.ctx.canvas.height
         );
 
-        return tmpCanvas.toDataURL(options.imageType, options.imageQuality);
+        return tmpCanvas.canvas.toDataURL(options.imageType, options.imageQuality);
     };
 
     // Expose the class via the global object
