@@ -302,14 +302,9 @@
                 }
 
                 // If shift is held, keep a ratio
-                if (e.shiftKey) {
-
-                    // Set the ratio if one isn't set
-                    if (!drawParameters.ratio) {
-                        drawParameters.ratio = Math.abs((canvasX - self.cropCoords.x) / (canvasY - self.cropCoords.y));
-                    }
+                if (e.shiftKey && !drawParameters.ratio) {
+                    drawParameters.ratio = Math.abs((canvasX - self.cropCoords.x) / (canvasY - self.cropCoords.y));
                 } else {
-                    // Reset the ratio
                     drawParameters.ratio = false;
                 }
             } else if (currentMouseState === 'drawing') {
