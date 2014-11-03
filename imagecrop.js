@@ -227,42 +227,34 @@
 
         // Allow changing selection position with keyboard
         if (options.keyboard) {
-            var horizontal,
-                vertical;
-
             canvas.addEventListener('keydown', function (e) {
-                var stepValue;
+                var stepValue = options.keyboardStep,
+                    horizontal = vertical = 0;
 
                 if (e.keyCode >= 37 && e.keyCode <= 40) {
 
                     // Allow faster movement if shift key is down
                     if (e.shiftKey) {
-                        stepValue = options.keyboardStep * 10;
-                    } else {
-                        stepValue = options.keyboardStep;
+                        stepValue *= 10;
                     }
 
                     // Left
                     if (e.keyCode === 37) {
                         horizontal = stepValue * -1;
-                        vertical = 0;
                     }
 
                     // Up
                     else if (e.keyCode === 38) {
-                        horizontal = 0;
                         vertical = stepValue * -1;
                     }
 
                     // Right
                     else if (e.keyCode === 39) {
                         horizontal = stepValue;
-                        vertical = 0;
                     }
 
                     // Down
                     else if (e.keyCode === 40) {
-                        horizontal = 0;
                         vertical = stepValue;
                     }
 
