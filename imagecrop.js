@@ -123,9 +123,13 @@
             // If the selection is larger than the threshold, draw the selection
             if (Math.min(Math.abs(self.cropCoords.width), Math.abs(self.cropCoords.height)) > options.dragThreshold) {
 
-                // Collision detection
+                // Make sure x and y are within the canvas
                 if (self.cropCoords.x < 0) { self.cropCoords.x = 0; }
                 if (self.cropCoords.y < 0) { self.cropCoords.y = 0; }
+                if (self.cropCoords.x > layer.ctx.canvas.width) { self.cropCoords.x = layer.ctx.canvas.width; }
+                if (self.cropCoords.y > layer.ctx.canvas.height) { self.cropCoords.y = layer.ctx.canvas.height; }
+
+                // Make sure the width and height are maxed out
                 if (Math.abs(self.cropCoords.width) > layer.ctx.canvas.width) {
                     self.cropCoords.width = layer.ctx.canvas.width * (self.cropCoords.width < 0 ? -1 : 1);
                 }
@@ -146,17 +150,10 @@
                 }
 
                 if (ratio) {
-                    var absWidth = Math.abs(self.cropCoords.width),
-                        absHeight = Math.abs(self.cropCoords.height),
-                        minSideLength = Math.min(absWidth / ratio, absHeight);
+                    var sideLength = Math.min(Math.abs(self.cropCoords.width) / ratio, Math.abs(self.cropCoords.height));
 
-                    self.cropCoords.width = self.cropCoords.width < 0 ?
-                                            -1 * minSideLength * ratio :
-                                            minSideLength * ratio;
-
-                    self.cropCoords.height = self.cropCoords.height < 0 ?
-                                            -1 * minSideLength :
-                                            minSideLength;
+                    self.cropCoords.width = sideLength * (self.cropCoords.width < 0 ? -1 : 1) * ratio;
+                    self.cropCoords.height = sideLength * (self.cropCoords.height < 0 ? -1 : 1);
                 }
 
                 // Clear everything on the canvas
