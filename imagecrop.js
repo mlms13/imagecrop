@@ -291,6 +291,9 @@
             if (currentMouseState === 'resizing') {
                 self.cropCoords.x = dragCoords.x;
                 self.cropCoords.y = dragCoords.y;
+            }
+
+            if (currentMouseState === 'resizing' || currentMouseState === 'drawing') {
 
                 if (mouseLocation === 'n-resize' || mouseLocation === 's-resize') {
                     self.cropCoords.height = canvasY - self.cropCoords.y;
@@ -301,15 +304,12 @@
                     self.cropCoords.height = canvasY - self.cropCoords.y;
                 }
 
-                // If shift is held, keep a ratio
+                // If shift key is held, keep a ratio
                 if (e.shiftKey && !drawParameters.ratio) {
                     drawParameters.ratio = Math.abs((canvasX - self.cropCoords.x) / (canvasY - self.cropCoords.y));
-                } else {
+                } else if (!e.shiftKey) {
                     drawParameters.ratio = false;
                 }
-            } else if (currentMouseState === 'drawing') {
-                self.cropCoords.width = canvasX - self.cropCoords.x;
-                self.cropCoords.height = canvasY - self.cropCoords.y;
             } else if (currentMouseState === 'dragging') {
                 self.cropCoords.x = canvasX - dragCoords.mouseX;
                 self.cropCoords.y = canvasY - dragCoords.mouseY;
