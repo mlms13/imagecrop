@@ -135,11 +135,11 @@
                 if (self.cropCoords.height < 0 && self.cropCoords.height * -1 > self.cropCoords.y) {
                     self.cropCoords.height = self.cropCoords.y * -1;
                 }
-                if (self.cropCoords.width + self.cropCoords.x > layer.ctx.canvas.width) {
-                    self.cropCoords.width = layer.ctx.canvas.width - self.cropCoords.x;
+                if (self.cropCoords.x + self.cropCoords.width > layer.ctx.canvas.width) {
+                    self.cropCoords.x = layer.ctx.canvas.width - self.cropCoords.width;
                 }
-                if (self.cropCoords.height + self.cropCoords.y > layer.ctx.canvas.height) {
-                    self.cropCoords.height = layer.ctx.canvas.height - self.cropCoords.y;
+                if (self.cropCoords.y + self.cropCoords.height > layer.ctx.canvas.height) {
+                    self.cropCoords.y = layer.ctx.canvas.height - self.cropCoords.height;
                 }
 
                 // Fix a ratio if required
