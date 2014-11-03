@@ -9,7 +9,7 @@
     /**
      * Class for cropping images using canvas
      *
-     * @class ImageCrop - Manages image cropping and saving
+     * @class ImageCrop        - Manages image cropping and saving
      * @param {object} options - Options for this instance
      */
     function ImageCrop (options) {
@@ -454,8 +454,8 @@
     /**
      * Create the canvas elements and assign them to globals
      *
-     * @param {string|array} layer - Layer name as a string, or an array of layers
-     * @return {{}|array{}} - Object containing the canvas and the context or array of objects
+     * @param {(string|string[])} layer - Layer name as a string, or an array of strings
+     * @return {object|object[]}        - Object containing the canvas and the context or array of objects
      */
     proto.createLayer = function (layer) {
 
@@ -508,8 +508,8 @@
     /**
      * Draw the canvases, if a layer is specified, only draw that layer
      *
-     * @param {string|string[]} [layer] - Layer name as a string, or an array of layers
-     * @param {object} [drawParameters] - Parameters used for drawing
+     * @param {(string|string[])} [layer] - Layer name as a string, or an array of layers
+     * @param {object} [drawParameters]   - Parameters used for drawing
      */
     proto.draw = function (layer, drawParameters) {
         drawParameters = drawParameters || {};
@@ -540,8 +540,8 @@
      * If the first parameter is an object, pass any new parameters to the options global
      * If the first parameter is a string, and the second parameter exists, update the option using the first parameter as a key
      *
-     * @param {object|string} prop - Object of options, or string of an option key
-     * @param {mixed} value - Value to set if the first parameter is a string
+     * @param {(object|string)} prop - Object of options, or string of an option key
+     * @param {*} [value]            - Value to set if the first parameter is a string
      */
     proto.set = function (prop, value) {
         var objProp;
