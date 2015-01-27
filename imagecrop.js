@@ -220,6 +220,7 @@
         var options = this.getOptions(),
             self = this,
             canvas = this.canvas.selection.canvas,
+            canvasBox = canvas.getBoundingClientRect(),
             dragCoords = {},
             drawParameters = {},
             currentMouseState, mouseLocation;
@@ -282,8 +283,8 @@
 
         // handle moving when the mouse is down
         canvas.addEventListener('mousemove', function (e) {
-            var canvasX = e.pageX - canvas.offsetLeft,
-                canvasY = e.pageY - canvas.offsetTop;
+            var canvasX = e.pageX - canvasBox.left,
+                canvasY = e.pageY - canvasBox.top;
 
             if (currentMouseState === 'resizing') {
                 self.cropCoords.x = dragCoords.x;
@@ -384,8 +385,8 @@
 
         // set up event listeners on the canvas
         canvas.addEventListener('mousedown', function (e) {
-            var canvasX = e.pageX - canvas.offsetLeft,
-                canvasY = e.pageY - canvas.offsetTop;
+            var canvasX = e.pageX - canvasBox.left,
+                canvasY = e.pageY - canvasBox.top;
 
             // Check to see if we're resizing
             if (mouseLocation.indexOf('resize') > -1) {
@@ -485,6 +486,8 @@
 
         // Set the canvas up for the named layer
         else {
+            var imageBox = this.image.getBoundingClientRect();
+
             // Create the canvas element
             this.canvas[layer.name].canvas = document.createElement('canvas');
             this.canvas[layer.name].ctx    = this.canvas[layer.name].canvas.getContext('2d');
@@ -492,11 +495,11 @@
             // Set the canvas to sit in place of the original image
             this.canvas[layer.name].canvas.id             = 'imagecrop-' + layer.name;
             this.canvas[layer.name].canvas.className      = 'imagecrop';
-            this.canvas[layer.name].canvas.width          = layer.width || this.image.offsetWidth;
-            this.canvas[layer.name].canvas.height         = layer.height || this.image.offsetHeight;
+            this.canvas[layer.name].canvas.width          = layer.width || imageBox.width;
+            this.canvas[layer.name].canvas.height         = layer.height || imageBox.height;
             this.canvas[layer.name].canvas.style.position = 'absolute';
-            this.canvas[layer.name].canvas.style.top      = layer.top || this.image.offsetTop + 'px';
-            this.canvas[layer.name].canvas.style.left     = layer.left || this.image.offsetLeft + 'px';
+            this.canvas[layer.name].canvas.style.top      = layer.top || imageBox.top + 'px';
+            this.canvas[layer.name].canvas.style.left     = layer.left || imageBox.left + 'px';
 
             // Function that the draw method will call, make sure to override
             this.canvas[layer.name].draw = function (layer, drawParameters) {};
