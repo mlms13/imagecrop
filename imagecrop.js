@@ -543,28 +543,25 @@
      * Update the options with the passed parameter(s)
      * If the options global is not set, set it to the default options
      * If the first parameter is an object, pass any new parameters to the options global
-     * If the first parameter is a string, and the second parameter exists, update the option using the first parameter as a key
+     * If the first parameter is a string, update the option using the first parameter as a key
      *
      * @param {(object|string)} prop - Object of options, or string of an option key
      * @param {*} [value]            - Value to set if the first parameter is a string
      */
     proto.set = function (prop, value) {
-        var objProp;
 
         // Set the options to the defaults if they aren't currently set
         if (!this._options) {
-            this._options = this._defaultOptions;
+            this._options = this.helpers.extend({}, this._defaultOptions);
         }
 
-        // if an object is passed as the first parameter, loop through it
+        // if an object is passed as the first parameter, extend the options object with it
         if (typeof prop === 'object') {
-            for (objProp in prop) {
-                this.set(objProp, prop[objProp]);
-            }
+            this.helpers.extend(this._options, prop);
         }
 
-        // otherwise assume we were given a property and update it
-        else {
+        // otherwise assume we were given a property/value and update it
+        else if (prop) {
             this._options[prop] = value;
         }
     };
@@ -604,6 +601,26 @@
         );
 
         return tmpCanvas.canvas.toDataURL(options.imageType, options.imageQuality);
+    };
+
+    proto.helpers = {
+
+        // Stolen from underscore, extend an object's properties into another
+        extend: function () {
+            var source, prop;
+
+            for (var i = 0, length = arguments.length; i < length; i++) {
+                source = arguments[i];
+
+                for (prop in source) {
+                    if (hasOwnProperty.call(source, prop)) {
+                        this[prop] = source[prop];
+                    }
+                }
+            }
+
+            return this;
+        },
     };
 
     // Expose the class via the global object
